@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuestions } from "../context/QuestionContext";
 import { useSession } from "../context/SessionContext";
@@ -12,19 +12,13 @@ function getCorrectAnswer(q: Question): string {
     const opt = q.options.find((o) => o.id === q.correctOptionId);
     return opt ? `${opt.id.toUpperCase()}. ${opt.text}` : q.correctOptionId;
   }
-  if (q.type === "true-false") {
-    return q.correctAnswer ? "True" : "False";
-  }
+  if (q.type === "true-false") return q.correctAnswer ? "True" : "False";
   return q.correction;
 }
 
 function checkAnswer(q: Question, response: string): boolean {
-  if (q.type === "multiple-choice") {
-    return response === q.correctOptionId;
-  }
-  if (q.type === "true-false") {
-    return response === String(q.correctAnswer);
-  }
+  if (q.type === "multiple-choice") return response === q.correctOptionId;
+  if (q.type === "true-false") return response === String(q.correctAnswer);
   return response.trim().toLowerCase() === q.correction.trim().toLowerCase();
 }
 
@@ -32,7 +26,6 @@ export default function StudentPage() {
   const { bank, loading } = useQuestions();
   const { currentIndex, answers, submitAnswer, advance } = useSession();
   const navigate = useNavigate();
-
   const [showFeedback, setShowFeedback] = useState(false);
 
   const questions = useMemo(
@@ -47,20 +40,22 @@ export default function StudentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-gray-500 text-lg">Loading questions…</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500">Loading questions…</p>
+        </div>
       </div>
     );
   }
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white rounded-2xl p-8 shadow-md text-center max-w-sm">
-          <p className="text-gray-500 mb-4">No questions available yet.</p>
-          <p className="text-sm text-gray-400">
-            Ask your teacher to add questions via the admin panel.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100">
+        <div className="bg-white rounded-2xl p-8 shadow-md text-center max-w-sm mx-4">
+          <div className="text-4xl mb-3">📝</div>
+          <p className="text-gray-600 mb-2 font-medium">No questions available yet.</p>
+          <p className="text-sm text-gray-400">Ask your teacher to add questions via the admin panel.</p>
         </div>
       </div>
     );
@@ -73,11 +68,10 @@ export default function StudentPage() {
 
   const handleSubmit = (response: string) => {
     if (!question) return;
-    const isCorrect = checkAnswer(question, response);
     submitAnswer({
       questionId: question.id,
       studentResponse: response,
-      isCorrect,
+      isCorrect: checkAnswer(question, response),
       answeredAt: Date.now(),
     });
     setShowFeedback(true);
@@ -95,18 +89,16 @@ export default function StudentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-indigo-800">
-            English Grammar Quiz
-          </h1>
-          <a
-            href="#/admin"
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            Teacher login
+          <div>
+            <h1 className="text-xl font-bold text-indigo-800">If Conditionals Quiz</h1>
+            <p className="text-xs text-gray-400 mt-0.5">Answer each question, then read the explanation.</p>
+          </div>
+          <a href="#/" className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">
+            ← Home
           </a>
         </div>
 
@@ -119,30 +111,24 @@ export default function StudentPage() {
 
         {/* Question */}
         {question && !showFeedback && (
-          <QuestionCard
-            question={question}
-            topic={topic}
-            onSubmit={handleSubmit}
-          />
+          <QuestionCard question={question} topic={topic} onSubmit={handleSubmit} />
         )}
 
         {/* Feedback */}
         {showFeedback && question && lastAnswer && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full">
-                {question.text.length > 80
-                  ? question.text.slice(0, 77) + "…"
-                  : question.text}
-              </span>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 pt-5 pb-1">
+              <p className="text-sm text-gray-500 line-clamp-2">{question.text}</p>
             </div>
-            <FeedbackPanel
-              isCorrect={lastAnswer.isCorrect}
-              explanation={question.explanation}
-              correctAnswer={getCorrectAnswer(question)}
-              onNext={handleNext}
-              isLast={currentIndex === questions.length - 1}
-            />
+            <div className="px-6 pb-5">
+              <FeedbackPanel
+                isCorrect={lastAnswer.isCorrect}
+                explanation={question.explanation}
+                correctAnswer={getCorrectAnswer(question)}
+                onNext={handleNext}
+                isLast={currentIndex === questions.length - 1}
+              />
+            </div>
           </div>
         )}
       </div>
