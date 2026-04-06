@@ -1,0 +1,127 @@
+{
+  "topics": [
+    { "id": "topic-1", "name": "Present Simple", "color": "#4F86C6", "order": 1 },
+    { "id": "topic-2", "name": "Articles", "color": "#F4A261", "order": 2 },
+    { "id": "topic-3", "name": "Prepositions", "color": "#2A9D8F", "order": 3 },
+    { "id": "topic-4", "name": "Plurals", "color": "#E76F51", "order": 4 }
+  ],
+  "questions": [
+    {
+      "id": "q-001",
+      "topicId": "topic-1",
+      "type": "multiple-choice",
+      "order": 1,
+      "text": "Which sentence uses the correct present simple form?",
+      "options": [
+        { "id": "a", "text": "She go to school every day." },
+        { "id": "b", "text": "She goes to school every day." },
+        { "id": "c", "text": "She going to school every day." },
+        { "id": "d", "text": "She gone to school every day." }
+      ],
+      "correctOptionId": "b",
+      "explanation": "In present simple, third-person singular (he/she/it) requires adding -s or -es to the verb. 'Go' becomes 'goes'."
+    },
+    {
+      "id": "q-002",
+      "topicId": "topic-1",
+      "type": "true-false",
+      "order": 2,
+      "text": "The sentence 'He play tennis on Sundays.' is grammatically correct.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! Third-person singular requires 'plays', not 'play'. The correct sentence is: 'He plays tennis on Sundays.'"
+    },
+    {
+      "id": "q-003",
+      "topicId": "topic-1",
+      "type": "error-correction",
+      "order": 3,
+      "text": "Find and fix the error: 'My sister do not like coffee.'",
+      "errorSegment": "do not",
+      "correction": "does not",
+      "explanation": "With third-person singular subjects (he/she/it), use 'does not' (doesn't) instead of 'do not' (don't)."
+    },
+    {
+      "id": "q-004",
+      "topicId": "topic-2",
+      "type": "multiple-choice",
+      "order": 4,
+      "text": "Choose the correct article to complete the sentence: '___ apple a day keeps the doctor away.'",
+      "options": [
+        { "id": "a", "text": "A" },
+        { "id": "b", "text": "An" },
+        { "id": "c", "text": "The" },
+        { "id": "d", "text": "No article needed" }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Use 'an' before words that begin with a vowel sound. 'Apple' starts with the vowel sound /æ/, so we use 'an'."
+    },
+    {
+      "id": "q-005",
+      "topicId": "topic-2",
+      "type": "true-false",
+      "order": 5,
+      "text": "The sentence 'I saw a elephant at the zoo.' is grammatically correct.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! 'Elephant' begins with a vowel sound, so we must use 'an', not 'a'. The correct sentence is: 'I saw an elephant at the zoo.'"
+    },
+    {
+      "id": "q-006",
+      "topicId": "topic-2",
+      "type": "error-correction",
+      "order": 6,
+      "text": "Find and fix the error: 'She is a honest person.'",
+      "errorSegment": "a honest",
+      "correction": "an honest",
+      "explanation": "Although 'honest' starts with the letter 'h', the 'h' is silent, so the word begins with a vowel sound /ɒ/. Use 'an' before vowel sounds."
+    },
+    {
+      "id": "q-007",
+      "topicId": "topic-3",
+      "type": "multiple-choice",
+      "order": 7,
+      "text": "Which preposition correctly completes: 'The meeting is ___ Monday morning.'",
+      "options": [
+        { "id": "a", "text": "in" },
+        { "id": "b", "text": "at" },
+        { "id": "c", "text": "on" },
+        { "id": "d", "text": "by" }
+      ],
+      "correctOptionId": "c",
+      "explanation": "Use 'on' with days of the week and specific dates (on Monday, on 5th July). Use 'in' for months/years, and 'at' for specific times."
+    },
+    {
+      "id": "q-008",
+      "topicId": "topic-3",
+      "type": "error-correction",
+      "order": 8,
+      "text": "Find and fix the error: 'I have lived here since three years.'",
+      "errorSegment": "since three years",
+      "correction": "for three years",
+      "explanation": "Use 'for' with a period/duration of time (for three years, for a week). Use 'since' with a specific point in time (since 2020, since Monday)."
+    },
+    {
+      "id": "q-009",
+      "topicId": "topic-4",
+      "type": "multiple-choice",
+      "order": 9,
+      "text": "What is the correct plural form of 'child'?",
+      "options": [
+        { "id": "a", "text": "childs" },
+        { "id": "b", "text": "childes" },
+        { "id": "c", "text": "children" },
+        { "id": "d", "text": "childrens" }
+      ],
+      "correctOptionId": "c",
+      "explanation": "'Child' is an irregular noun. Its plural is 'children', not 'childs'. Other irregular plurals include: man→men, woman→women, tooth→teeth, foot→feet."
+    },
+    {
+      "id": "q-010",
+      "topicId": "topic-4",
+      "type": "true-false",
+      "order": 10,
+      "text": "The plural of 'tomato' is 'tomatos'.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! Nouns ending in -o (preceded by a consonant) form their plural with -es: tomato→tomatoes, potato→potatoes. However, some exceptions exist (e.g., photos, pianos)."
+    }
+  ]
+}
