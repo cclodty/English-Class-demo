@@ -34,6 +34,18 @@ export default function ResultsPage() {
   };
   const msg = getMessage();
 
+  // Per-topic feedback helpers
+  const getTopicFeedback = (topicPct: number) => {
+    if (topicPct >= 90) return { label: "Excellent", labelColor: "bg-green-100 text-green-700", tip: "You have a solid grasp of this topic. Keep it up!" };
+    if (topicPct >= 70) return { label: "Good", labelColor: "bg-blue-100 text-blue-700", tip: "Good understanding. A quick revision of the rules will help consolidate your knowledge." };
+    if (topicPct >= 50) return { label: "Needs Review", labelColor: "bg-amber-100 text-amber-700", tip: "You understand the basics but make some mistakes. Review the grammar rules and example sentences." };
+    return { label: "Needs Practice", labelColor: "bg-red-100 text-red-700", tip: "This topic needs more attention. Revisit the formula and do extra exercises before moving on." };
+  };
+
+  // Overall recommendation
+  const weakTopics = topicStats.filter((s) => s.total > 0 && s.correct / s.total < 0.7);
+  const strongTopics = topicStats.filter((s) => s.total > 0 && s.correct / s.total >= 0.7);
+
   const circumference = 2 * Math.PI * 40;
   const offset = circumference - (pct / 100) * circumference;
 
@@ -80,26 +92,80 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* Topic breakdown */}
+        {/* Topic breakdown with feedback */}
         {topicStats.length > 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-            <h2 className="font-semibold text-gray-800 mb-3">Performance by Topic</h2>
-            <div className="space-y-3">
-              {topicStats.map((s) => (
-                <div key={s.name}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium" style={{ color: s.color }}>{s.name}</span>
-                    <span className="text-gray-500">{s.correct}/{s.total}</span>
+            <h2 className="font-semibold text-gray-800 mb-4">Performance by Topic</h2>
+            <div className="space-y-4">
+              {topicStats.map((s) => {
+                const topicPct = Math.round((s.correct / s.total) * 100);
+                const fb = getTopicFeedback(topicPct);
+                return (
+                  <div key={s.name} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold" style={{ color: s.color }}>{s.name}</span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${fb.labelColor}`}>
+                          {fb.label}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 tabular-nums">{s.correct}/{s.total} · {topicPct}%</span>
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${topicPct}%`, backgroundColor: s.color }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 leading-snug">{fb.tip}</p>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${Math.round((s.correct / s.total) * 100)}%`, backgroundColor: s.color }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+          </div>
+        )}
+
+        {/* Recommendation panel */}
+        {topicStats.length > 0 && (
+          <div className={`rounded-2xl border-2 p-5 ${weakTopics.length === 0 ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"}`}>
+            <h2 className={`font-semibold mb-2 ${weakTopics.length === 0 ? "text-green-800" : "text-amber-800"}`}>
+              {weakTopics.length === 0 ? "🎉 Recommendation" : "📚 Recommendation"}
+            </h2>
+            {weakTopics.length === 0 ? (
+              <p className="text-sm text-green-700">
+                You performed well across all topics!{" "}
+                {strongTopics.length > 0 && (
+                  <>Keep practising <strong>{strongTopics.map((t) => t.name).join(", ")}</strong> to maintain your mastery.</>
+                )}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-amber-800">
+                  We recommend spending more time on the following topic{weakTopics.length > 1 ? "s" : ""}:
+                </p>
+                <ul className="space-y-1">
+                  {weakTopics.map((t) => {
+                    const topicPct = Math.round((t.correct / t.total) * 100);
+                    return (
+                      <li key={t.name} className="flex items-start gap-2 text-sm">
+                        <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: t.color }} />
+                        <span>
+                          <strong style={{ color: t.color }}>{t.name}</strong>
+                          {topicPct < 50
+                            ? " — Review the formula and try the exercises from scratch."
+                            : " — Review the grammar rules and practice with extra examples."}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {strongTopics.length > 0 && (
+                  <p className="text-xs text-amber-700 mt-2">
+                    You did well in: {strongTopics.map((t) => t.name).join(", ")}.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
 

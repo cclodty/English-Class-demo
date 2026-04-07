@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuestions } from "../context/QuestionContext";
 import { useSession } from "../context/SessionContext";
 import type { Question } from "../types";
@@ -24,12 +24,14 @@ function checkAnswer(q: Question, response: string): boolean {
 
 export default function StudentPage() {
   const { bank, loading } = useQuestions();
-  const { currentQuestionId, answers, visitedPath, isComplete, startSession, submitAnswer } = useSession();
+  const { currentQuestionId, answers, visitedPath, isComplete, startSession, submitAnswer, reset } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean } | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
 
   const questionsMap = useMemo(
     () => new Map(bank.questions.map((q) => [q.id, q])),
@@ -40,12 +42,18 @@ export default function StudentPage() {
     [bank.topics]
   );
 
-  // Start session when bank loads
+  // Start session when bank loads (optionally from a specific topic entry point)
   useEffect(() => {
     if (!loading && bank.rootQuestionId && currentQuestionId === null && !isComplete) {
-      startSession(bank.rootQuestionId);
+      const startId =
+        (location.state as { startId?: string } | null)?.startId ?? bank.rootQuestionId;
+      // Validate the startId exists in the bank, fall back to root if not
+      const validStart = bank.questions.some((q) => q.id === startId)
+        ? startId
+        : bank.rootQuestionId;
+      startSession(validStart);
     }
-  }, [loading, bank.rootQuestionId, currentQuestionId, isComplete, startSession]);
+  }, [loading, bank.rootQuestionId, currentQuestionId, isComplete, startSession, location.state, bank.questions]);
 
   // Navigate to results when complete
   useEffect(() => {
@@ -102,11 +110,9 @@ export default function StudentPage() {
       {/* Top bar */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <a href="#/" className="text-gray-400 hover:text-indigo-600 text-sm transition-colors">← Home</a>
-          <span className="text-gray-200">|</span>
           <span className="text-sm font-semibold text-gray-700">If Conditionals Quiz</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="text-sm text-gray-500">
             <span className="text-green-600 font-semibold">{correct}</span>
             <span className="text-gray-300 mx-1">/</span>
@@ -119,6 +125,31 @@ export default function StudentPage() {
           >
             {showMap ? "Hide Map" : "🗺️ Show Map"}
           </button>
+          {/* Abandon quiz */}
+          {!confirmAbandon ? (
+            <button
+              onClick={() => setConfirmAbandon(true)}
+              className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-300 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Abandon Quiz
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+              <span className="text-xs text-red-600 font-medium">Quit?</span>
+              <button
+                onClick={() => { reset(); navigate("/"); }}
+                className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded transition-colors"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setConfirmAbandon(false)}
+                className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              >
+                No
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
