@@ -1,46 +1,64 @@
-import React, { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import type { StudentAnswer } from "../types";
 
 interface SessionContextValue {
-  currentIndex: number;
+  currentQuestionId: string | null;
   answers: StudentAnswer[];
+  /** Ordered list of question IDs the student has visited */
+  visitedPath: string[];
   isComplete: boolean;
-  submitAnswer: (answer: StudentAnswer) => void;
-  advance: (totalQuestions?: number) => void;
+  startSession: (rootId: string) => void;
+  submitAnswer: (answer: StudentAnswer, nextId: string | null) => void;
   reset: () => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<StudentAnswer[]>([]);
+  const [visitedPath, setVisitedPath] = useState<string[]>([]);
   const [isComplete, setIsComplete] = useState(false);
 
-  const submitAnswer = useCallback((answer: StudentAnswer) => {
-    setAnswers((prev) => [...prev, answer]);
+  const startSession = useCallback((rootId: string) => {
+    setCurrentQuestionId(rootId);
+    setVisitedPath([rootId]);
+    setAnswers([]);
+    setIsComplete(false);
   }, []);
 
-  const advance = useCallback(
-    (totalQuestions?: number) => {
-      const nextIndex = currentIndex + 1;
-      if (totalQuestions !== undefined && nextIndex >= totalQuestions) {
+  const submitAnswer = useCallback(
+    (answer: StudentAnswer, nextId: string | null) => {
+      setAnswers((prev) => [...prev, answer]);
+      if (nextId === null) {
         setIsComplete(true);
+        setCurrentQuestionId(null);
+      } else {
+        setCurrentQuestionId(nextId);
+        setVisitedPath((prev) => [...prev, nextId]);
       }
-      setCurrentIndex(nextIndex);
     },
-    [currentIndex]
+    []
   );
 
   const reset = useCallback(() => {
-    setCurrentIndex(0);
+    setCurrentQuestionId(null);
     setAnswers([]);
+    setVisitedPath([]);
     setIsComplete(false);
   }, []);
 
   return (
     <SessionContext.Provider
-      value={{ currentIndex, answers, isComplete, submitAnswer, advance, reset }}
+      value={{
+        currentQuestionId,
+        answers,
+        visitedPath,
+        isComplete,
+        startSession,
+        submitAnswer,
+        reset,
+      }}
     >
       {children}
     </SessionContext.Provider>

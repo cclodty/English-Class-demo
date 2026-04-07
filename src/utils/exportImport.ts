@@ -1,16 +1,16 @@
 import * as XLSX from "xlsx";
 import type { QuestionBank, Question, Topic } from "../types";
 
-// ─── Excel column definitions ────────────────────────────────────────────────
-// id | type | topicId | order | text | explanation |
-// optionA | optionB | optionC | optionD | correctOptionId |
-// correctAnswer | errorSegment | correction
+// ─── Excel row shape ──────────────────────────────────────────────────────────
+// Columns: id | type | topicId | text | explanation |
+//          optionA | optionB | optionC | optionD | correctOptionId |
+//          correctAnswer | errorSegment | correction |
+//          onCorrect | onIncorrect
 
 interface ExcelRow {
   id: string;
   type: string;
   topicId: string;
-  order: number;
   text: string;
   explanation: string;
   optionA?: string;
@@ -21,53 +21,59 @@ interface ExcelRow {
   correctAnswer?: string;
   errorSegment?: string;
   correction?: string;
+  onCorrect?: string;
+  onIncorrect?: string;
 }
+
+const HEADERS = [
+  "id", "type", "topicId", "text", "explanation",
+  "optionA", "optionB", "optionC", "optionD", "correctOptionId",
+  "correctAnswer", "errorSegment", "correction",
+  "onCorrect", "onIncorrect",
+];
 
 function bankToRows(bank: QuestionBank): ExcelRow[] {
-  return [...bank.questions]
-    .sort((a, b) => a.order - b.order)
-    .map((q) => {
-      const base: ExcelRow = {
-        id: q.id,
-        type: q.type,
-        topicId: q.topicId,
-        order: q.order,
-        text: q.text,
-        explanation: q.explanation,
-      };
-      if (q.type === "multiple-choice") {
-        base.optionA = q.options.find((o) => o.id === "a")?.text ?? "";
-        base.optionB = q.options.find((o) => o.id === "b")?.text ?? "";
-        base.optionC = q.options.find((o) => o.id === "c")?.text ?? "";
-        base.optionD = q.options.find((o) => o.id === "d")?.text ?? "";
-        base.correctOptionId = q.correctOptionId;
-      } else if (q.type === "true-false") {
-        base.correctAnswer = String(q.correctAnswer);
-      } else if (q.type === "error-correction") {
-        base.errorSegment = q.errorSegment;
-        base.correction = q.correction;
-      }
-      return base;
-    });
+  return bank.questions.map((q) => {
+    const row: ExcelRow = {
+      id: q.id,
+      type: q.type,
+      topicId: q.topicId,
+      text: q.text,
+      explanation: q.explanation,
+      onCorrect: q.onCorrect ?? "",
+      onIncorrect: q.onIncorrect ?? "",
+    };
+    if (q.type === "multiple-choice") {
+      row.optionA = q.options.find((o) => o.id === "a")?.text ?? "";
+      row.optionB = q.options.find((o) => o.id === "b")?.text ?? "";
+      row.optionC = q.options.find((o) => o.id === "c")?.text ?? "";
+      row.optionD = q.options.find((o) => o.id === "d")?.text ?? "";
+      row.correctOptionId = q.correctOptionId;
+    } else if (q.type === "true-false") {
+      row.correctAnswer = String(q.correctAnswer);
+    } else if (q.type === "error-correction") {
+      row.errorSegment = q.errorSegment;
+      row.correction = q.correction;
+    }
+    return row;
+  });
 }
 
-function rowsToBank(rows: ExcelRow[], existingTopics: Topic[]): QuestionBank {
-  const topicsMap = new Map(existingTopics.map((t) => [t.id, t]));
-
-  const questions: Question[] = rows
+function rowsToQuestions(rows: ExcelRow[]): Question[] {
+  return rows
     .filter((r) => r.id && r.type && r.text)
     .map((r): Question | null => {
       const base = {
         id: String(r.id),
         topicId: String(r.topicId ?? ""),
-        order: Number(r.order) || 1,
         text: String(r.text),
         explanation: String(r.explanation ?? ""),
+        onCorrect: r.onCorrect && String(r.onCorrect).trim() ? String(r.onCorrect).trim() : null,
+        onIncorrect: r.onIncorrect && String(r.onIncorrect).trim() ? String(r.onIncorrect).trim() : null,
       };
       if (r.type === "multiple-choice") {
         return {
-          ...base,
-          type: "multiple-choice",
+          ...base, type: "multiple-choice",
           options: [
             { id: "a", text: String(r.optionA ?? "") },
             { id: "b", text: String(r.optionB ?? "") },
@@ -77,24 +83,13 @@ function rowsToBank(rows: ExcelRow[], existingTopics: Topic[]): QuestionBank {
           correctOptionId: String(r.correctOptionId ?? "a"),
         };
       } else if (r.type === "true-false") {
-        return {
-          ...base,
-          type: "true-false",
-          correctAnswer: String(r.correctAnswer).toLowerCase() === "true",
-        };
+        return { ...base, type: "true-false", correctAnswer: String(r.correctAnswer).toLowerCase() === "true" };
       } else if (r.type === "error-correction") {
-        return {
-          ...base,
-          type: "error-correction",
-          errorSegment: String(r.errorSegment ?? ""),
-          correction: String(r.correction ?? ""),
-        };
+        return { ...base, type: "error-correction", errorSegment: String(r.errorSegment ?? ""), correction: String(r.correction ?? "") };
       }
       return null;
     })
     .filter((q): q is Question => q !== null);
-
-  return { topics: existingTopics, questions };
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
@@ -103,34 +98,25 @@ export function exportBankAsExcel(bank: QuestionBank): void {
   const wb = XLSX.utils.book_new();
 
   // Questions sheet
-  const qRows = bankToRows(bank);
-  const qSheet = XLSX.utils.json_to_sheet(qRows, {
-    header: [
-      "id", "type", "topicId", "order", "text", "explanation",
-      "optionA", "optionB", "optionC", "optionD",
-      "correctOptionId", "correctAnswer", "errorSegment", "correction",
-    ],
-  });
-  // Set column widths
+  const qSheet = XLSX.utils.json_to_sheet(bankToRows(bank), { header: HEADERS });
   qSheet["!cols"] = [
-    { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 6 }, { wch: 50 }, { wch: 50 },
-    { wch: 30 }, { wch: 30 }, { wch: 30 }, { wch: 30 },
-    { wch: 14 }, { wch: 13 }, { wch: 20 }, { wch: 20 },
+    { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 60 }, { wch: 60 },
+    { wch: 35 }, { wch: 35 }, { wch: 35 }, { wch: 35 }, { wch: 14 },
+    { wch: 13 }, { wch: 25 }, { wch: 25 }, { wch: 18 }, { wch: 18 },
   ];
   XLSX.utils.book_append_sheet(wb, qSheet, "Questions");
 
   // Topics sheet
-  const tRows = bank.topics.map((t) => ({
-    id: t.id,
-    name: t.name,
-    color: t.color,
-    order: t.order,
-  }));
-  const tSheet = XLSX.utils.json_to_sheet(tRows, {
-    header: ["id", "name", "color", "order"],
-  });
-  tSheet["!cols"] = [{ wch: 20 }, { wch: 24 }, { wch: 10 }, { wch: 6 }];
+  const tSheet = XLSX.utils.json_to_sheet(
+    bank.topics.map((t) => ({ id: t.id, name: t.name, color: t.color })),
+    { header: ["id", "name", "color"] }
+  );
+  tSheet["!cols"] = [{ wch: 20 }, { wch: 24 }, { wch: 10 }];
   XLSX.utils.book_append_sheet(wb, tSheet, "Topics");
+
+  // Meta sheet
+  const metaSheet = XLSX.utils.json_to_sheet([{ rootQuestionId: bank.rootQuestionId }]);
+  XLSX.utils.book_append_sheet(wb, metaSheet, "Meta");
 
   XLSX.writeFile(wb, "questions.xlsx");
 }
@@ -149,27 +135,25 @@ export function importBankFromExcel(
       const wb = XLSX.read(data, { type: "array" });
 
       const qSheet = wb.Sheets["Questions"];
-      if (!qSheet) {
-        onError('Missing "Questions" sheet. Please use the exported template.');
-        return;
-      }
-
+      if (!qSheet) { onError('Missing "Questions" sheet.'); return; }
       const rows = XLSX.utils.sheet_to_json<ExcelRow>(qSheet);
+      const questions = rowsToQuestions(rows);
+      if (questions.length === 0) { onError("No valid questions found."); return; }
 
-      // Parse topics from Topics sheet if present
       let topics: Topic[] = [];
       const tSheet = wb.Sheets["Topics"];
       if (tSheet) {
-        const tRows = XLSX.utils.sheet_to_json<Topic>(tSheet);
-        topics = tRows.filter((t) => t.id && t.name);
+        topics = (XLSX.utils.sheet_to_json<Topic>(tSheet)).filter((t) => t.id && t.name);
       }
 
-      const bank = rowsToBank(rows, topics);
-      if (bank.questions.length === 0) {
-        onError("No valid questions found in the Excel file.");
-        return;
+      let rootQuestionId = questions[0]?.id ?? "";
+      const metaSheet = wb.Sheets["Meta"];
+      if (metaSheet) {
+        const meta = XLSX.utils.sheet_to_json<{ rootQuestionId: string }>(metaSheet);
+        if (meta[0]?.rootQuestionId) rootQuestionId = meta[0].rootQuestionId;
       }
-      onSuccess(bank);
+
+      onSuccess({ topics, questions, rootQuestionId });
     } catch (err) {
       onError(`Failed to read Excel file: ${err instanceof Error ? err.message : "unknown error"}`);
     }
@@ -177,14 +161,12 @@ export function importBankFromExcel(
   reader.readAsArrayBuffer(file);
 }
 
-// ─── Legacy JSON helpers (kept for backward compatibility) ───────────────────
+// ─── Legacy JSON export ───────────────────────────────────────────────────────
 
 export function exportBankAsJSON(bank: QuestionBank): void {
   const blob = new Blob([JSON.stringify(bank, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "questions.json";
-  a.click();
+  a.href = url; a.download = "questions.json"; a.click();
   URL.revokeObjectURL(url);
 }

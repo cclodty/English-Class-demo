@@ -1,243 +1,1119 @@
 {
   "topics": [
-    { "id": "topic-zero", "name": "Zero Conditional", "color": "#059669", "order": 1 },
-    { "id": "topic-first", "name": "First Conditional", "color": "#2563EB", "order": 2 },
-    { "id": "topic-second", "name": "Second Conditional", "color": "#7C3AED", "order": 3 },
-    { "id": "topic-third", "name": "Third Conditional", "color": "#DC2626", "order": 4 }
+    {
+      "id": "topic-zero",
+      "name": "Zero Conditional",
+      "color": "#059669"
+    },
+    {
+      "id": "topic-first",
+      "name": "First Conditional",
+      "color": "#2563EB"
+    },
+    {
+      "id": "topic-second",
+      "name": "Second Conditional",
+      "color": "#7C3AED"
+    },
+    {
+      "id": "topic-third",
+      "name": "Third Conditional",
+      "color": "#DC2626"
+    }
   ],
   "questions": [
     {
-      "id": "q-001",
+      "id": "z1",
       "topicId": "topic-zero",
       "type": "multiple-choice",
-      "order": 1,
-      "text": "Which sentence is a Zero Conditional (stating a general truth)?",
+      "text": "Which of the following is a Zero Conditional sentence?",
       "options": [
-        { "id": "a", "text": "If it rains tomorrow, I will bring an umbrella." },
-        { "id": "b", "text": "If you heat water to 100°C, it boils." },
-        { "id": "c", "text": "If I were rich, I would travel the world." },
-        { "id": "d", "text": "If she had studied, she would have passed." }
+        {
+          "id": "a",
+          "text": "If it rains tomorrow, I will cancel the picnic."
+        },
+        {
+          "id": "b",
+          "text": "If you heat water to 100°C, it boils."
+        },
+        {
+          "id": "c",
+          "text": "If I were rich, I would buy a yacht."
+        },
+        {
+          "id": "d",
+          "text": "If she had studied harder, she would have passed."
+        }
       ],
       "correctOptionId": "b",
-      "explanation": "Zero Conditional uses 'If + present simple, present simple' to express general truths or facts that are always true. Water always boils at 100°C — this is a scientific fact."
+      "explanation": "Zero Conditional uses 'If + present simple, present simple' for facts that are always true. Boiling at 100°C is a scientific fact — it always happens. Options A, C, and D use different conditional types.",
+      "onCorrect": "z2",
+      "onIncorrect": "zr1",
+      "position": {
+        "x": 300,
+        "y": 0
+      },
+      "isRoot": true
     },
     {
-      "id": "q-002",
+      "id": "zr1",
       "topicId": "topic-zero",
       "type": "true-false",
-      "order": 2,
-      "text": "The sentence 'If you mix blue and yellow, you get green.' is a correctly formed Zero Conditional.",
+      "text": "The sentence 'If you press the power button, the computer turns on.' is a Zero Conditional.",
       "correctAnswer": true,
-      "explanation": "Correct! This is a perfect Zero Conditional: 'If + present simple (mix), present simple (get)'. It states a fact about colour mixing that is always true."
+      "explanation": "Correct! 'If + present simple (press), present simple (turns on)' — this describes an automatic cause-and-effect fact, which is the Zero Conditional structure.",
+      "onCorrect": "z2",
+      "onIncorrect": "zr2",
+      "position": {
+        "x": 650,
+        "y": 0
+      }
     },
     {
-      "id": "q-003",
+      "id": "zr2",
       "topicId": "topic-zero",
       "type": "multiple-choice",
-      "order": 3,
-      "text": "Complete the Zero Conditional: 'If plants don't get sunlight, they ___ .'",
+      "text": "In Zero Conditional, which tenses are used in BOTH clauses?",
       "options": [
-        { "id": "a", "text": "will die" },
-        { "id": "b", "text": "die" },
-        { "id": "c", "text": "would die" },
-        { "id": "d", "text": "had died" }
+        {
+          "id": "a",
+          "text": "Past simple + past simple"
+        },
+        {
+          "id": "b",
+          "text": "Present simple + present simple"
+        },
+        {
+          "id": "c",
+          "text": "Present simple + will + verb"
+        },
+        {
+          "id": "d",
+          "text": "Past simple + would + verb"
+        }
       ],
       "correctOptionId": "b",
-      "explanation": "In Zero Conditional, both clauses use present simple. Since we want to state a general truth ('plants always die without sunlight'), we use 'die', not 'will die' or 'would die'."
+      "explanation": "Zero Conditional always uses present simple in BOTH the if-clause AND the result clause. Example: 'If you mix red and blue, you get purple.' Both 'mix' and 'get' are present simple.",
+      "onCorrect": "z2",
+      "onIncorrect": "z2",
+      "position": {
+        "x": 950,
+        "y": 0
+      }
     },
     {
-      "id": "q-004",
+      "id": "z2",
       "topicId": "topic-zero",
-      "type": "error-correction",
-      "order": 4,
-      "text": "Find and fix the error: 'If you freezes water, it becomes ice.'",
-      "errorSegment": "freezes",
-      "correction": "freeze",
-      "explanation": "In Zero Conditional, the verb in the 'if clause' uses present simple — base form for all subjects. 'You' takes the base form 'freeze', not 'freezes' (which is for he/she/it)."
-    },
-    {
-      "id": "q-005",
-      "topicId": "topic-zero",
-      "type": "true-false",
-      "order": 5,
-      "text": "The sentence 'If you press this button, the light turns on.' is a Zero Conditional.",
-      "correctAnswer": true,
-      "explanation": "Correct! 'If + present simple (press), present simple (turns on)' — this describes an automatic, cause-and-effect result that always happens, making it a Zero Conditional."
-    },
-    {
-      "id": "q-006",
-      "topicId": "topic-first",
       "type": "multiple-choice",
-      "order": 6,
-      "text": "Which sentence is a correctly formed First Conditional?",
+      "text": "Complete the Zero Conditional: 'If you __ water, it becomes ice.'",
       "options": [
-        { "id": "a", "text": "If it will rain tomorrow, I stay home." },
-        { "id": "b", "text": "If it rains tomorrow, I will stay home." },
-        { "id": "c", "text": "If it rained tomorrow, I would stay home." },
-        { "id": "d", "text": "If it had rained, I would have stayed home." }
-      ],
-      "correctOptionId": "b",
-      "explanation": "First Conditional uses 'If + present simple, will + base verb'. It describes a real, possible future situation. Option A incorrectly uses 'will rain' in the if-clause."
-    },
-    {
-      "id": "q-007",
-      "topicId": "topic-first",
-      "type": "true-false",
-      "order": 7,
-      "text": "The sentence 'If you will study hard, you will pass the exam.' is grammatically correct.",
-      "correctAnswer": false,
-      "explanation": "Incorrect! In First Conditional, do NOT use 'will' in the if-clause. The correct sentence is: 'If you study hard, you will pass the exam.' — the if-clause uses present simple."
-    },
-    {
-      "id": "q-008",
-      "topicId": "topic-first",
-      "type": "error-correction",
-      "order": 8,
-      "text": "Find and fix the error: 'If it rain tomorrow, we will cancel the picnic.'",
-      "errorSegment": "rain",
-      "correction": "rains",
-      "explanation": "In First Conditional, the if-clause uses present simple. The subject 'it' is third-person singular, so the verb must be 'rains' (with -s), not 'rain'."
-    },
-    {
-      "id": "q-009",
-      "topicId": "topic-first",
-      "type": "multiple-choice",
-      "order": 9,
-      "text": "Complete the First Conditional: 'If she ___ her homework, the teacher will be upset.'",
-      "options": [
-        { "id": "a", "text": "won't do" },
-        { "id": "b", "text": "doesn't do" },
-        { "id": "c", "text": "didn't do" },
-        { "id": "d", "text": "hadn't done" }
-      ],
-      "correctOptionId": "b",
-      "explanation": "In the if-clause of a First Conditional, use present simple (including present simple negative: 'doesn't do'). 'Won't do' is wrong because 'will' cannot go in the if-clause."
-    },
-    {
-      "id": "q-010",
-      "topicId": "topic-first",
-      "type": "error-correction",
-      "order": 10,
-      "text": "Find and fix the error: 'If you heat this metal, it will expands.'",
-      "errorSegment": "will expands",
-      "correction": "will expand",
-      "explanation": "After 'will', always use the base form (infinitive without 'to'). 'Expands' adds an -s which is wrong here. The correct form is 'will expand'."
-    },
-    {
-      "id": "q-011",
-      "topicId": "topic-first",
-      "type": "multiple-choice",
-      "order": 11,
-      "text": "Choose the correct First Conditional sentence:",
-      "options": [
-        { "id": "a", "text": "If he study more, he will pass." },
-        { "id": "b", "text": "If he studies more, he will pass." },
-        { "id": "c", "text": "If he will study more, he will pass." },
-        { "id": "d", "text": "If he studied more, he will pass." }
-      ],
-      "correctOptionId": "b",
-      "explanation": "'He' is third-person singular, so the present simple verb needs -s: 'studies'. 'Will study' is wrong in the if-clause. 'Studied' belongs to Second Conditional, not First."
-    },
-    {
-      "id": "q-012",
-      "topicId": "topic-first",
-      "type": "true-false",
-      "order": 12,
-      "text": "The sentence 'If they miss the bus, they will be late for school.' expresses a real, possible situation.",
-      "correctAnswer": true,
-      "explanation": "Correct! This is a First Conditional. Missing the bus and being late is a real, possible future scenario. First Conditional is used for situations that could genuinely happen."
-    },
-    {
-      "id": "q-013",
-      "topicId": "topic-second",
-      "type": "multiple-choice",
-      "order": 13,
-      "text": "Which sentence is a correctly formed Second Conditional?",
-      "options": [
-        { "id": "a", "text": "If I am rich, I will buy a house." },
-        { "id": "b", "text": "If I were rich, I would buy a house." },
-        { "id": "c", "text": "If I am rich, I would buy a house." },
-        { "id": "d", "text": "If I will be rich, I would buy a house." }
-      ],
-      "correctOptionId": "b",
-      "explanation": "Second Conditional uses 'If + past simple, would + base verb' to talk about imaginary or unlikely present/future situations. Note: 'were' is used for all persons (I/he/she/it were), not 'was', in formal Second Conditional."
-    },
-    {
-      "id": "q-014",
-      "topicId": "topic-second",
-      "type": "true-false",
-      "order": 14,
-      "text": "The sentence 'If I had a million dollars, I would travel the world.' is a Second Conditional.",
-      "correctAnswer": true,
-      "explanation": "Correct! 'If + past simple (had), would + base verb (travel)' — this is a Second Conditional. It describes an imaginary situation (having a million dollars) and its imagined result."
-    },
-    {
-      "id": "q-015",
-      "topicId": "topic-second",
-      "type": "error-correction",
-      "order": 15,
-      "text": "Find and fix the error: 'If she knew the answer, she will tell us.'",
-      "errorSegment": "will tell",
-      "correction": "would tell",
-      "explanation": "In Second Conditional, the main clause uses 'would + base verb', not 'will'. 'Will' is used in First Conditional (real situations). Since 'knew' shows this is imaginary, 'would tell' is correct."
-    },
-    {
-      "id": "q-016",
-      "topicId": "topic-second",
-      "type": "multiple-choice",
-      "order": 16,
-      "text": "Complete the Second Conditional: 'If dogs could talk, they ___ ask for more food.'",
-      "options": [
-        { "id": "a", "text": "will" },
-        { "id": "b", "text": "would" },
-        { "id": "c", "text": "can" },
-        { "id": "d", "text": "do" }
-      ],
-      "correctOptionId": "b",
-      "explanation": "Second Conditional requires 'would' in the main clause. Dogs cannot really talk — this is an imaginary situation, so we use 'would ask', not 'will ask'. 'Would' signals unreality."
-    },
-    {
-      "id": "q-017",
-      "topicId": "topic-second",
-      "type": "true-false",
-      "order": 17,
-      "text": "The sentence 'If I were you, I will apologize.' is grammatically correct.",
-      "correctAnswer": false,
-      "explanation": "Incorrect! 'If I were you' is Second Conditional, so the main clause must use 'would', not 'will'. The correct sentence is: 'If I were you, I would apologize.' This is a common error to avoid."
-    },
-    {
-      "id": "q-018",
-      "topicId": "topic-third",
-      "type": "multiple-choice",
-      "order": 18,
-      "text": "Which sentence is a correctly formed Third Conditional?",
-      "options": [
-        { "id": "a", "text": "If I study hard, I will pass." },
-        { "id": "b", "text": "If I studied hard, I would pass." },
-        { "id": "c", "text": "If I had studied hard, I would have passed." },
-        { "id": "d", "text": "If I have studied hard, I will have passed." }
+        {
+          "id": "a",
+          "text": "will freeze"
+        },
+        {
+          "id": "b",
+          "text": "froze"
+        },
+        {
+          "id": "c",
+          "text": "freeze"
+        },
+        {
+          "id": "d",
+          "text": "would freeze"
+        }
       ],
       "correctOptionId": "c",
-      "explanation": "Third Conditional uses 'If + past perfect (had + past participle), would have + past participle'. It talks about an imaginary change to a past situation and its imagined past result."
+      "explanation": "'Freeze' (present simple base form) is correct. Zero Conditional requires present simple in the if-clause. 'Will freeze' belongs to First Conditional; 'froze' and 'would freeze' belong to other types.",
+      "onCorrect": "z3",
+      "onIncorrect": "zr3",
+      "position": {
+        "x": 300,
+        "y": 175
+      }
     },
     {
-      "id": "q-019",
-      "topicId": "topic-third",
+      "id": "zr3",
+      "topicId": "topic-zero",
+      "type": "true-false",
+      "text": "The sentence 'If you don't water plants, they die.' is grammatically correct as a Zero Conditional.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + present simple negative (don't water), present simple (die)' — this is a valid Zero Conditional stating a general biological fact.",
+      "onCorrect": "z3",
+      "onIncorrect": "zr4",
+      "position": {
+        "x": 650,
+        "y": 175
+      }
+    },
+    {
+      "id": "zr4",
+      "topicId": "topic-zero",
       "type": "error-correction",
-      "order": 19,
-      "text": "Find and fix the error: 'If she had left earlier, she would miss the traffic.'",
-      "errorSegment": "would miss",
-      "correction": "would have missed",
-      "explanation": "In Third Conditional, the main clause needs 'would have + past participle'. Since the if-clause uses past perfect ('had left'), the result must also be in the past: 'would have missed', not 'would miss'."
+      "text": "Find and fix the error: 'If you heats metal, it expands.'",
+      "errorSegment": "heats",
+      "correction": "heat",
+      "explanation": "In Zero Conditional, the if-clause uses present simple. With 'you', use the base form 'heat', not 'heats' (which is for he/she/it). Correct: 'If you heat metal, it expands.'",
+      "onCorrect": "z3",
+      "onIncorrect": "z3",
+      "position": {
+        "x": 950,
+        "y": 175
+      }
     },
     {
-      "id": "q-020",
+      "id": "z3",
+      "topicId": "topic-zero",
+      "type": "true-false",
+      "text": "The sentence 'If ice gets warm, it melts.' is a Zero Conditional.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + present simple (gets warm), present simple (melts)' — melting is a physical fact that always happens when ice warms up. This is a perfect Zero Conditional.",
+      "onCorrect": "z4",
+      "onIncorrect": "zr5",
+      "position": {
+        "x": 300,
+        "y": 350
+      }
+    },
+    {
+      "id": "zr5",
+      "topicId": "topic-zero",
+      "type": "multiple-choice",
+      "text": "Which sentence is NOT a Zero Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If you add salt to water, it boils faster."
+        },
+        {
+          "id": "b",
+          "text": "If you exercise regularly, you stay healthy."
+        },
+        {
+          "id": "c",
+          "text": "If it rains tomorrow, I will bring an umbrella."
+        },
+        {
+          "id": "d",
+          "text": "If dogs don't eat, they get hungry."
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "Option C uses 'will bring', making it a First Conditional (real future). Zero Conditional states general truths using present simple in both clauses. Options A, B, and D all describe reliable facts.",
+      "onCorrect": "z4",
+      "onIncorrect": "zr6",
+      "position": {
+        "x": 650,
+        "y": 350
+      }
+    },
+    {
+      "id": "zr6",
+      "topicId": "topic-zero",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If you will mix vinegar and baking soda, it fizzes.'",
+      "errorSegment": "will mix",
+      "correction": "mix",
+      "explanation": "Never use 'will' in the if-clause of a Zero Conditional. Use present simple: 'If you mix vinegar and baking soda, it fizzes.' This rule also applies to First Conditional.",
+      "onCorrect": "z4",
+      "onIncorrect": "z4",
+      "position": {
+        "x": 950,
+        "y": 350
+      }
+    },
+    {
+      "id": "z4",
+      "topicId": "topic-zero",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If you touches a hot stove, it burns you.'",
+      "errorSegment": "touches",
+      "correction": "touch",
+      "explanation": "With 'you', use the base form 'touch', not 'touches'. 'Touches' is for third-person singular (he/she/it). Correct: 'If you touch a hot stove, it burns you.'",
+      "onCorrect": "f1",
+      "onIncorrect": "zr7",
+      "position": {
+        "x": 300,
+        "y": 525
+      }
+    },
+    {
+      "id": "zr7",
+      "topicId": "topic-zero",
+      "type": "true-false",
+      "text": "The sentence 'If the temperature drops below 0°C, water freezes.' uses Zero Conditional correctly.",
+      "correctAnswer": true,
+      "explanation": "Correct! This is a perfect Zero Conditional: 'If + present simple (drops), present simple (freezes).' It states a scientific fact about the freezing point of water.",
+      "onCorrect": "f1",
+      "onIncorrect": "zr8",
+      "position": {
+        "x": 650,
+        "y": 525
+      }
+    },
+    {
+      "id": "zr8",
+      "topicId": "topic-zero",
+      "type": "multiple-choice",
+      "text": "Choose the correct Zero Conditional: 'If you __ enough sleep, you feel tired.'",
+      "options": [
+        {
+          "id": "a",
+          "text": "won't get"
+        },
+        {
+          "id": "b",
+          "text": "didn't get"
+        },
+        {
+          "id": "c",
+          "text": "don't get"
+        },
+        {
+          "id": "d",
+          "text": "wouldn't get"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "'Don't get' is present simple negative — correct for Zero Conditional. 'Won't get' is First Conditional; 'didn't get' is past simple; 'wouldn't get' is Second Conditional.",
+      "onCorrect": "f1",
+      "onIncorrect": "f1",
+      "position": {
+        "x": 950,
+        "y": 525
+      }
+    },
+    {
+      "id": "f1",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Which sentence is a correctly formed First Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If it will rain tomorrow, I stay at home."
+        },
+        {
+          "id": "b",
+          "text": "If it rains tomorrow, I will stay at home."
+        },
+        {
+          "id": "c",
+          "text": "If it rained tomorrow, I would stay at home."
+        },
+        {
+          "id": "d",
+          "text": "If it had rained, I would have stayed at home."
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "First Conditional uses 'If + present simple, will + base verb' for real future possibilities. Option A incorrectly uses 'will rain' in the if-clause. Option C is Second Conditional; Option D is Third Conditional.",
+      "onCorrect": "f2",
+      "onIncorrect": "fr1",
+      "position": {
+        "x": 300,
+        "y": 850
+      }
+    },
+    {
+      "id": "fr1",
+      "topicId": "topic-first",
+      "type": "true-false",
+      "text": "The First Conditional describes situations that are impossible or imaginary.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! First Conditional describes REAL, possible future situations. Example: 'If you study, you will pass.' (It's genuinely possible.) Second Conditional is for imaginary/unlikely situations.",
+      "onCorrect": "f2",
+      "onIncorrect": "fr2",
+      "position": {
+        "x": 650,
+        "y": 850
+      }
+    },
+    {
+      "id": "fr2",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Which tenses form the First Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Past simple + would + verb"
+        },
+        {
+          "id": "b",
+          "text": "Present simple + present simple"
+        },
+        {
+          "id": "c",
+          "text": "Present simple + will + base verb"
+        },
+        {
+          "id": "d",
+          "text": "Past perfect + would have + past participle"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "First Conditional = 'If + present simple, will + base verb'. Example: 'If she calls, I will answer.' The if-clause uses present simple; the main clause uses will + verb.",
+      "onCorrect": "f2",
+      "onIncorrect": "f2",
+      "position": {
+        "x": 950,
+        "y": 850
+      }
+    },
+    {
+      "id": "f2",
+      "topicId": "topic-first",
+      "type": "true-false",
+      "text": "The sentence 'If you will work hard, you will succeed.' is grammatically correct.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! NEVER use 'will' in the if-clause of First Conditional. The correct sentence is: 'If you work hard, you will succeed.' The if-clause must use present simple.",
+      "onCorrect": "f3",
+      "onIncorrect": "fr3",
+      "position": {
+        "x": 300,
+        "y": 1025
+      }
+    },
+    {
+      "id": "fr3",
+      "topicId": "topic-first",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If she will call me, I will answer.'",
+      "errorSegment": "will call",
+      "correction": "calls",
+      "explanation": "Remove 'will' from the if-clause. Use present simple instead: 'calls'. Correct sentence: 'If she calls me, I will answer.' This is a very common error to avoid in First Conditional.",
+      "onCorrect": "f3",
+      "onIncorrect": "fr4",
+      "position": {
+        "x": 650,
+        "y": 1025
+      }
+    },
+    {
+      "id": "fr4",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Choose the correct sentence:",
+      "options": [
+        {
+          "id": "a",
+          "text": "If he will arrive late, we will start without him."
+        },
+        {
+          "id": "b",
+          "text": "If he arrives late, we will start without him."
+        },
+        {
+          "id": "c",
+          "text": "If he arrived late, we would start without him."
+        },
+        {
+          "id": "d",
+          "text": "If he arrive late, we will start without him."
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Option B is correct: 'If + present simple (arrives), will + base verb (start).' Option A has 'will' in if-clause (wrong). Option C is Second Conditional. Option D uses base form without -s (wrong for he/she/it).",
+      "onCorrect": "f3",
+      "onIncorrect": "f3",
+      "position": {
+        "x": 950,
+        "y": 1025
+      }
+    },
+    {
+      "id": "f3",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Complete the First Conditional: 'If it __ tomorrow, we will cancel the match.'",
+      "options": [
+        {
+          "id": "a",
+          "text": "will rain"
+        },
+        {
+          "id": "b",
+          "text": "rained"
+        },
+        {
+          "id": "c",
+          "text": "rains"
+        },
+        {
+          "id": "d",
+          "text": "would rain"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "'Rains' (present simple, 3rd person singular) is correct. In the if-clause of First Conditional, always use present simple. 'Will rain' is the most common mistake — avoid 'will' in the if-clause.",
+      "onCorrect": "f4",
+      "onIncorrect": "fr5",
+      "position": {
+        "x": 300,
+        "y": 1200
+      }
+    },
+    {
+      "id": "fr5",
+      "topicId": "topic-first",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If they don't hurry, they will misses the bus.'",
+      "errorSegment": "will misses",
+      "correction": "will miss",
+      "explanation": "After 'will', always use the BASE form of the verb (no -s, no -ing, no -ed). 'Misses' adds -s which is wrong. Correct: 'If they don't hurry, they will miss the bus.'",
+      "onCorrect": "f4",
+      "onIncorrect": "fr6",
+      "position": {
+        "x": 650,
+        "y": 1200
+      }
+    },
+    {
+      "id": "fr6",
+      "topicId": "topic-first",
+      "type": "true-false",
+      "text": "The sentence 'If you eat too much sugar, you will get a toothache.' is a First Conditional.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + present simple (eat), will + base verb (get)' — this describes a real future consequence. First Conditional is perfect for cause-and-effect relationships about possible future events.",
+      "onCorrect": "f4",
+      "onIncorrect": "f4",
+      "position": {
+        "x": 950,
+        "y": 1200
+      }
+    },
+    {
+      "id": "f4",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Which sentence uses FIRST Conditional (not Zero Conditional)?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If you heat ice, it melts."
+        },
+        {
+          "id": "b",
+          "text": "If bacteria grow in food, it goes off."
+        },
+        {
+          "id": "c",
+          "text": "If you pass your exams, your parents will be proud."
+        },
+        {
+          "id": "d",
+          "text": "If plants don't get water, they die."
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "Option C is First Conditional: 'If + present simple, will + verb.' It's a specific future situation (you passing exams), not a general truth. Options A, B, and D are Zero Conditional — they describe facts that always happen.",
+      "onCorrect": "f5",
+      "onIncorrect": "fr7",
+      "position": {
+        "x": 300,
+        "y": 1375
+      }
+    },
+    {
+      "id": "fr7",
+      "topicId": "topic-first",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If she study hard, she will pass the exam.'",
+      "errorSegment": "study",
+      "correction": "studies",
+      "explanation": "'She' is third-person singular, so add -s/-es to the verb: 'studies'. Correct: 'If she studies hard, she will pass the exam.' Don't forget subject-verb agreement in First Conditional if-clauses.",
+      "onCorrect": "f5",
+      "onIncorrect": "fr8",
+      "position": {
+        "x": 650,
+        "y": 1375
+      }
+    },
+    {
+      "id": "fr8",
+      "topicId": "topic-first",
+      "type": "true-false",
+      "text": "The sentence 'If you don't apologize, she won't forgive you.' is grammatically correct.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + present simple negative (don't apologize), will not + base verb (won't forgive)' — this is a valid First Conditional. Both positive and negative forms work in the same pattern.",
+      "onCorrect": "f5",
+      "onIncorrect": "f5",
+      "position": {
+        "x": 950,
+        "y": 1375
+      }
+    },
+    {
+      "id": "f5",
+      "topicId": "topic-first",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If the team plays well, they will wins the trophy.'",
+      "errorSegment": "will wins",
+      "correction": "will win",
+      "explanation": "After 'will', use the base form without any endings. 'Wins' adds -s which is wrong. Correct: 'If the team plays well, they will win the trophy.'",
+      "onCorrect": "s1",
+      "onIncorrect": "fr9",
+      "position": {
+        "x": 300,
+        "y": 1550
+      }
+    },
+    {
+      "id": "fr9",
+      "topicId": "topic-first",
+      "type": "multiple-choice",
+      "text": "Choose the grammatically correct First Conditional sentence:",
+      "options": [
+        {
+          "id": "a",
+          "text": "If we leave now, we will catch the train."
+        },
+        {
+          "id": "b",
+          "text": "If we will leave now, we will catch the train."
+        },
+        {
+          "id": "c",
+          "text": "If we left now, we would catch the train."
+        },
+        {
+          "id": "d",
+          "text": "If we leave now, we catch the train."
+        }
+      ],
+      "correctOptionId": "a",
+      "explanation": "Option A is correct: 'If + present simple (leave), will + verb (catch).' Option B has 'will' in if-clause (wrong). Option C is Second Conditional. Option D uses present simple in both clauses (Zero Conditional pattern).",
+      "onCorrect": "s1",
+      "onIncorrect": "s1",
+      "position": {
+        "x": 650,
+        "y": 1550
+      }
+    },
+    {
+      "id": "s1",
+      "topicId": "topic-second",
+      "type": "multiple-choice",
+      "text": "Which sentence is a correctly formed Second Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If I am rich, I will buy a mansion."
+        },
+        {
+          "id": "b",
+          "text": "If I were rich, I would buy a mansion."
+        },
+        {
+          "id": "c",
+          "text": "If I am rich, I would buy a mansion."
+        },
+        {
+          "id": "d",
+          "text": "If I will be rich, I would buy a mansion."
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Second Conditional uses 'If + past simple, would + base verb' for imaginary or unlikely situations. Note: use 'were' (not 'was') for all persons in formal Second Conditional. Option A is First Conditional; C and D mix tenses incorrectly.",
+      "onCorrect": "s2",
+      "onIncorrect": "sr1",
+      "position": {
+        "x": 300,
+        "y": 1850
+      }
+    },
+    {
+      "id": "sr1",
+      "topicId": "topic-second",
+      "type": "true-false",
+      "text": "Second Conditional describes situations that are real and likely to happen in the future.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! Second Conditional describes IMAGINARY or UNLIKELY situations. Example: 'If I were a bird, I would fly.' (You're not a bird — it's imaginary.) First Conditional is for real, possible futures.",
+      "onCorrect": "s2",
+      "onIncorrect": "sr2",
+      "position": {
+        "x": 650,
+        "y": 1850
+      }
+    },
+    {
+      "id": "sr2",
+      "topicId": "topic-second",
+      "type": "multiple-choice",
+      "text": "Which tenses form the Second Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Present simple + will + verb"
+        },
+        {
+          "id": "b",
+          "text": "Past simple + would + base verb"
+        },
+        {
+          "id": "c",
+          "text": "Past perfect + would have + past participle"
+        },
+        {
+          "id": "d",
+          "text": "Present perfect + would + verb"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Second Conditional = 'If + past simple, would + base verb'. Example: 'If she knew the answer, she would tell us.' The past simple in the if-clause signals unreality, NOT past time.",
+      "onCorrect": "s2",
+      "onIncorrect": "s2",
+      "position": {
+        "x": 950,
+        "y": 1850
+      }
+    },
+    {
+      "id": "s2",
+      "topicId": "topic-second",
+      "type": "true-false",
+      "text": "In Second Conditional, it is more formal and grammatically preferred to use 'were' instead of 'was' for all subjects, including 'I'.",
+      "correctAnswer": true,
+      "explanation": "Correct! In Second Conditional, 'were' is preferred for all subjects: 'If I were you...', 'If he were here...'. While 'was' is common in informal speech, 'were' is the standard in written and formal English.",
+      "onCorrect": "s3",
+      "onIncorrect": "sr3",
+      "position": {
+        "x": 300,
+        "y": 2025
+      }
+    },
+    {
+      "id": "sr3",
+      "topicId": "topic-second",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If I was you, I would apologize immediately.'",
+      "errorSegment": "was",
+      "correction": "were",
+      "explanation": "In Second Conditional, use 'were' for all subjects (not 'was'). Correct: 'If I were you, I would apologize immediately.' The expression 'If I were you' is a fixed phrase meaning 'in your situation'.",
+      "onCorrect": "s3",
+      "onIncorrect": "sr4",
+      "position": {
+        "x": 650,
+        "y": 2025
+      }
+    },
+    {
+      "id": "sr4",
+      "topicId": "topic-second",
+      "type": "multiple-choice",
+      "text": "Complete the Second Conditional: 'If dogs could talk, they __ ask for more walks.'",
+      "options": [
+        {
+          "id": "a",
+          "text": "will"
+        },
+        {
+          "id": "b",
+          "text": "would"
+        },
+        {
+          "id": "c",
+          "text": "can"
+        },
+        {
+          "id": "d",
+          "text": "do"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "'Would' is correct for Second Conditional. Dogs cannot really talk — this is imaginary. 'Will' belongs to First Conditional (real future). 'Would ask' signals that the situation is hypothetical.",
+      "onCorrect": "s3",
+      "onIncorrect": "s3",
+      "position": {
+        "x": 950,
+        "y": 2025
+      }
+    },
+    {
+      "id": "s3",
+      "topicId": "topic-second",
+      "type": "multiple-choice",
+      "text": "What is wrong with: 'If she knew the answer, she will tell us.'?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'Knew' should be 'know'"
+        },
+        {
+          "id": "b",
+          "text": "'Will tell' should be 'would tell'"
+        },
+        {
+          "id": "c",
+          "text": "'She' should be 'her'"
+        },
+        {
+          "id": "d",
+          "text": "Nothing is wrong"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "The if-clause 'If she knew' uses past simple, signalling Second Conditional. The main clause must use 'would', not 'will'. 'Will' is for First Conditional (real future). Correct: 'If she knew the answer, she would tell us.'",
+      "onCorrect": "s4",
+      "onIncorrect": "sr5",
+      "position": {
+        "x": 300,
+        "y": 2200
+      }
+    },
+    {
+      "id": "sr5",
+      "topicId": "topic-second",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If he had more time, he will learn the guitar.'",
+      "errorSegment": "will learn",
+      "correction": "would learn",
+      "explanation": "'Had' in the if-clause shows this is Second Conditional (imaginary present). The main clause must use 'would', not 'will'. Correct: 'If he had more time, he would learn the guitar.'",
+      "onCorrect": "s4",
+      "onIncorrect": "sr6",
+      "position": {
+        "x": 650,
+        "y": 2200
+      }
+    },
+    {
+      "id": "sr6",
+      "topicId": "topic-second",
+      "type": "true-false",
+      "text": "The sentence 'If I were taller, I would join the basketball team.' is grammatically correct.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + past simple (were), would + base verb (join)' — perfect Second Conditional. Being tall enough for basketball is imagined (the speaker is not tall enough now), which is why Second Conditional is used.",
+      "onCorrect": "s4",
+      "onIncorrect": "s4",
+      "position": {
+        "x": 950,
+        "y": 2200
+      }
+    },
+    {
+      "id": "s4",
+      "topicId": "topic-second",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If she lived closer to school, she will walk every day.'",
+      "errorSegment": "will walk",
+      "correction": "would walk",
+      "explanation": "The if-clause 'If she lived closer' uses past simple, indicating Second Conditional (she doesn't live close — imaginary). The main clause must use 'would walk', not 'will walk'. 'Will' is only for First Conditional.",
+      "onCorrect": "t1",
+      "onIncorrect": "sr7",
+      "position": {
+        "x": 300,
+        "y": 2375
+      }
+    },
+    {
+      "id": "sr7",
+      "topicId": "topic-second",
+      "type": "multiple-choice",
+      "text": "Which sentence is Second Conditional (imaginary), NOT First Conditional (real)?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If it snows tomorrow, school will be cancelled."
+        },
+        {
+          "id": "b",
+          "text": "If you study, you will improve."
+        },
+        {
+          "id": "c",
+          "text": "If I had wings, I would fly to school."
+        },
+        {
+          "id": "d",
+          "text": "If she calls, I will answer."
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "Option C is Second Conditional — having wings is imaginary/impossible. Options A, B, and D are all First Conditional because they describe genuinely possible future events.",
+      "onCorrect": "t1",
+      "onIncorrect": "sr8",
+      "position": {
+        "x": 650,
+        "y": 2375
+      }
+    },
+    {
+      "id": "sr8",
+      "topicId": "topic-second",
+      "type": "true-false",
+      "text": "The sentence 'If I were the teacher, I would give less homework.' is a Second Conditional.",
+      "correctAnswer": true,
+      "explanation": "Correct! The speaker is not the teacher (imaginary situation). 'If + past simple (were), would + verb (give)' — this is a perfect Second Conditional expressing a hypothetical wish.",
+      "onCorrect": "t1",
+      "onIncorrect": "t1",
+      "position": {
+        "x": 950,
+        "y": 2375
+      }
+    },
+    {
+      "id": "t1",
+      "topicId": "topic-third",
+      "type": "multiple-choice",
+      "text": "Which sentence is a correctly formed Third Conditional?",
+      "options": [
+        {
+          "id": "a",
+          "text": "If I study hard, I will pass."
+        },
+        {
+          "id": "b",
+          "text": "If I studied hard, I would pass."
+        },
+        {
+          "id": "c",
+          "text": "If I had studied hard, I would have passed."
+        },
+        {
+          "id": "d",
+          "text": "If I have studied hard, I will have passed."
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "Third Conditional uses 'If + past perfect (had + past participle), would have + past participle' for imaginary changes to past situations. Option A is First; Option B is Second; Option D mixes tenses incorrectly.",
+      "onCorrect": "t2",
+      "onIncorrect": "tr1",
+      "position": {
+        "x": 300,
+        "y": 2700
+      }
+    },
+    {
+      "id": "tr1",
       "topicId": "topic-third",
       "type": "true-false",
-      "order": 20,
-      "text": "The sentence 'If they had taken a map, they wouldn't have gotten lost.' is a grammatically correct Third Conditional.",
+      "text": "Third Conditional is used to talk about situations that actually happened in the past.",
+      "correctAnswer": false,
+      "explanation": "Incorrect! Third Conditional talks about IMAGINARY changes to the past — things that did NOT happen. Example: 'If she had studied, she would have passed.' (She didn't study and didn't pass — we're imagining a different past.)",
+      "onCorrect": "t2",
+      "onIncorrect": "tr2",
+      "position": {
+        "x": 650,
+        "y": 2700
+      }
+    },
+    {
+      "id": "tr2",
+      "topicId": "topic-third",
+      "type": "multiple-choice",
+      "text": "In Third Conditional, what form does the if-clause use?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Present perfect (has/have + past participle)"
+        },
+        {
+          "id": "b",
+          "text": "Past perfect (had + past participle)"
+        },
+        {
+          "id": "c",
+          "text": "Past simple"
+        },
+        {
+          "id": "d",
+          "text": "Present simple"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Third Conditional if-clause uses PAST PERFECT: 'had + past participle'. Examples: 'If she had called...', 'If they had arrived...', 'If I had known...'. This past perfect signals we're imagining a different past.",
+      "onCorrect": "t2",
+      "onIncorrect": "t2",
+      "position": {
+        "x": 950,
+        "y": 2700
+      }
+    },
+    {
+      "id": "t2",
+      "topicId": "topic-third",
+      "type": "true-false",
+      "text": "The sentence 'If he had left earlier, he would have caught the train.' is grammatically correct Third Conditional.",
       "correctAnswer": true,
-      "explanation": "Correct! 'If + past perfect (had taken), would + have + past participle (wouldn't have gotten)' — this is a perfect Third Conditional. It imagines a different past action and its different past result."
+      "explanation": "Correct! 'If + past perfect (had left), would have + past participle (would have caught)' — perfect Third Conditional. The speaker implies he did NOT leave early and did NOT catch the train.",
+      "onCorrect": "t3",
+      "onIncorrect": "tr3",
+      "position": {
+        "x": 300,
+        "y": 2875
+      }
+    },
+    {
+      "id": "tr3",
+      "topicId": "topic-third",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If they had brought a map, they would lose their way.'",
+      "errorSegment": "would lose",
+      "correction": "would not have lost",
+      "explanation": "In Third Conditional, the main clause uses 'would have + past participle'. 'Would lose' is Second Conditional. Also, the meaning should be negative (they wouldn't have gotten lost). Correct: 'If they had brought a map, they would not have lost their way.'",
+      "onCorrect": "t3",
+      "onIncorrect": "tr4",
+      "position": {
+        "x": 650,
+        "y": 2875
+      }
+    },
+    {
+      "id": "tr4",
+      "topicId": "topic-third",
+      "type": "multiple-choice",
+      "text": "Complete the Third Conditional: 'If she __ earlier, she would have caught the flight.'",
+      "options": [
+        {
+          "id": "a",
+          "text": "left"
+        },
+        {
+          "id": "b",
+          "text": "would leave"
+        },
+        {
+          "id": "c",
+          "text": "had left"
+        },
+        {
+          "id": "d",
+          "text": "has left"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "'Had left' (past perfect) is correct for the if-clause of Third Conditional. 'Left' alone is past simple (Second Conditional). 'Would leave' cannot go in the if-clause. 'Has left' is present perfect (wrong).",
+      "onCorrect": "t3",
+      "onIncorrect": "t3",
+      "position": {
+        "x": 950,
+        "y": 2875
+      }
+    },
+    {
+      "id": "t3",
+      "topicId": "topic-third",
+      "type": "multiple-choice",
+      "text": "What is wrong with: 'If we had booked earlier, we would save money.'?",
+      "options": [
+        {
+          "id": "a",
+          "text": "'Had booked' should be 'booked'"
+        },
+        {
+          "id": "b",
+          "text": "'Would save' should be 'would have saved'"
+        },
+        {
+          "id": "c",
+          "text": "'We' should be 'us'"
+        },
+        {
+          "id": "d",
+          "text": "Nothing is wrong"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "The if-clause 'If we had booked' uses past perfect — Third Conditional. The main clause must use 'would have + past participle': 'would have saved'. Using 'would save' (without 'have') is a very common mistake.",
+      "onCorrect": "t4",
+      "onIncorrect": "tr5",
+      "position": {
+        "x": 300,
+        "y": 3050
+      }
+    },
+    {
+      "id": "tr5",
+      "topicId": "topic-third",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If I had known about the sale, I will have bought more.'",
+      "errorSegment": "will have bought",
+      "correction": "would have bought",
+      "explanation": "The main clause of Third Conditional uses 'WOULD have + past participle', not 'will have'. 'Will' cannot be used in Third Conditional. Correct: 'If I had known about the sale, I would have bought more.'",
+      "onCorrect": "t4",
+      "onIncorrect": "tr6",
+      "position": {
+        "x": 650,
+        "y": 3050
+      }
+    },
+    {
+      "id": "tr6",
+      "topicId": "topic-third",
+      "type": "true-false",
+      "text": "The sentence 'If the team had practised more, they wouldn't have lost the final.' is Third Conditional.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + past perfect (had practised), would not have + past participle (wouldn't have lost)' — perfect Third Conditional. The team did not practise enough, and they did lose the final. We're imagining a different outcome.",
+      "onCorrect": "t4",
+      "onIncorrect": "t4",
+      "position": {
+        "x": 950,
+        "y": 3050
+      }
+    },
+    {
+      "id": "t4",
+      "topicId": "topic-third",
+      "type": "error-correction",
+      "text": "Find and fix the error: 'If she had taken the medicine, she would recovered faster.'",
+      "errorSegment": "would recovered",
+      "correction": "would have recovered",
+      "explanation": "Third Conditional main clause requires 'would HAVE + past participle'. 'Would recovered' is missing 'have'. Correct: 'If she had taken the medicine, she would have recovered faster.' Never omit 'have' in Third Conditional.",
+      "onCorrect": null,
+      "onIncorrect": "tr7",
+      "position": {
+        "x": 300,
+        "y": 3225
+      }
+    },
+    {
+      "id": "tr7",
+      "topicId": "topic-third",
+      "type": "multiple-choice",
+      "text": "Which correctly completes this Third Conditional? 'If he had studied the map, he __ lost.'",
+      "options": [
+        {
+          "id": "a",
+          "text": "wouldn't be"
+        },
+        {
+          "id": "b",
+          "text": "won't have been"
+        },
+        {
+          "id": "c",
+          "text": "wouldn't have been"
+        },
+        {
+          "id": "d",
+          "text": "wouldn't had been"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanation": "'Wouldn't have been' is correct: 'would not have + past participle (been)'. Option A ('wouldn't be') is Second Conditional. Option B uses 'won't' (wrong — needs 'would'). Option D has wrong form 'had been' after 'wouldn't'.",
+      "onCorrect": null,
+      "onIncorrect": "tr8",
+      "position": {
+        "x": 650,
+        "y": 3225
+      }
+    },
+    {
+      "id": "tr8",
+      "topicId": "topic-third",
+      "type": "true-false",
+      "text": "The sentence 'If they had listened to the teacher, they would have understood the lesson.' uses Third Conditional correctly.",
+      "correctAnswer": true,
+      "explanation": "Correct! 'If + past perfect (had listened), would have + past participle (would have understood)' — this is a perfect Third Conditional. It implies they did NOT listen and did NOT understand.",
+      "onCorrect": null,
+      "onIncorrect": null,
+      "position": {
+        "x": 950,
+        "y": 3225
+      }
     }
-  ]
+  ],
+  "rootQuestionId": "z1"
 }

@@ -4,7 +4,6 @@ export interface Topic {
   id: string;
   name: string;
   color: string;
-  order: number;
 }
 
 export interface ChoiceOption {
@@ -16,9 +15,16 @@ interface BaseQuestion {
   id: string;
   topicId: string;
   type: QuestionType;
-  order: number;
   text: string;
   explanation: string;
+  /** Starting question for the quiz */
+  isRoot?: boolean;
+  /** Next question ID when answered correctly (null = end of quiz) */
+  onCorrect: string | null;
+  /** Next question ID when answered incorrectly (null = end of quiz) */
+  onIncorrect: string | null;
+  /** Position on the mind map canvas */
+  position?: { x: number; y: number };
 }
 
 export interface MultipleChoiceQuestion extends BaseQuestion {
@@ -46,6 +52,8 @@ export type Question =
 export interface QuestionBank {
   topics: Topic[];
   questions: Question[];
+  /** ID of the first question to show */
+  rootQuestionId: string;
 }
 
 export interface StudentAnswer {
@@ -53,25 +61,4 @@ export interface StudentAnswer {
   studentResponse: string;
   isCorrect: boolean;
   answeredAt: number;
-}
-
-export interface SessionState {
-  currentIndex: number;
-  answers: StudentAnswer[];
-  isComplete: boolean;
-  startedAt: number;
-}
-
-export interface MindMapNode {
-  id: string;
-  type: "root" | "topic" | "question";
-  label: string;
-  status?: "correct" | "incorrect" | "unanswered";
-  color?: string;
-}
-
-export interface MindMapEdge {
-  id: string;
-  source: string;
-  target: string;
 }
