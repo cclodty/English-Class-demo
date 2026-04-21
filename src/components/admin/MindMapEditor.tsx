@@ -17,7 +17,6 @@ import { ReactFlow,
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import dagre from "@dagrejs/dagre";
 import type { Question, QuestionBank, Topic } from "../../types";
 import Button from "../shared/Button";
 
@@ -200,53 +199,116 @@ function applyFlowToBank(
   return { ...bank, questions };
 }
 
-/** Run dagre layout on question nodes, then reposition topic labels above their group. */
-function computeAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 80, ranksep: 100, marginx: 60, marginy: 60 });
+/**
+ * Z-snake layout:
+ *   - Even topics (0, 2, …) flow Left → Right
+ *   - Odd topics  (1, 3, …) flow Right → Left
+ *   - Main-path questions sit on the horizontal spine of each row
+ *   - Remedial (wrong-answer) chains hang vertically below their parent
+ *   - All rows share the same left/right bounds (aligned to the longest row)
+ *   - Topic label nodes sit 60 px above the first node of their row
+ */
+function computeZLayout(nodes: Node[], bank: QuestionBank): Node[] {
+  const MAIN_X_STEP = 280; // horizontal gap between main-path nodes
+  const REM_Y_STEP  = 160; // vertical gap per remedial level
+  const TOPIC_GAP   = 100; // extra gap between topic groups
+  const LEFT        = 80;  // left-edge of canvas
 
-  const questionNodes = nodes.filter((n) => n.type === "adminQuestion");
-  const topicLabelNodes = nodes.filter((n) => n.type !== "adminQuestion");
+  // ── helpers ──────────────────────────────────────────────────────────────
+  function getEntry(topicIdx: number, topicQIds: Set<string>): string {
+    if (topicIdx === 0) return bank.rootQuestionId;
+    return (
+      bank.questions.find(
+        q => !topicQIds.has(q.id) && q.onCorrect && topicQIds.has(q.onCorrect)
+      )?.onCorrect ?? ""
+    );
+  }
 
-  questionNodes.forEach((n) => g.setNode(n.id, { width: NODE_W, height: NODE_H }));
-
-  // Only add edges between nodes that exist in the graph
-  const nodeIds = new Set(questionNodes.map((n) => n.id));
-  edges.forEach((e) => {
-    if (nodeIds.has(e.source) && nodeIds.has(e.target)) {
-      g.setEdge(e.source, e.target);
+  function walkMainPath(entryId: string, topicQIds: Set<string>): string[] {
+    const path: string[] = [];
+    const seen = new Set<string>();
+    let cur: string | null = topicQIds.has(entryId) ? entryId : null;
+    while (cur && !seen.has(cur)) {
+      seen.add(cur); path.push(cur);
+      const q = bank.questions.find(q => q.id === cur);
+      cur = (q?.onCorrect && topicQIds.has(q.onCorrect)) ? q.onCorrect : null;
     }
+    return path;
+  }
+
+  // ── first pass: find max main-path length for consistent row width ────────
+  let maxMainLen = 1;
+  bank.topics.forEach((topic, idx) => {
+    const qIds = new Set(bank.questions.filter(q => q.topicId === topic.id).map(q => q.id));
+    const len = walkMainPath(getEntry(idx, qIds), qIds).length;
+    if (len > maxMainLen) maxMainLen = len;
+  });
+  const totalW = (maxMainLen - 1) * MAIN_X_STEP;
+
+  // ── second pass: assign positions ─────────────────────────────────────────
+  const positions = new Map<string, { x: number; y: number }>();
+  let baseY = 0;
+
+  bank.topics.forEach((topic, topicIdx) => {
+    const isLTR  = topicIdx % 2 === 0;
+    const topicQs  = bank.questions.filter(q => q.topicId === topic.id);
+    const topicQIds = new Set(topicQs.map(q => q.id));
+
+    const mainPath = walkMainPath(getEntry(topicIdx, topicQIds), topicQIds);
+    const placed   = new Set(mainPath);
+
+    // Place main-path nodes on the horizontal spine
+    mainPath.forEach((qId, i) => {
+      const x = isLTR ? LEFT + i * MAIN_X_STEP : LEFT + totalW - i * MAIN_X_STEP;
+      positions.set(qId, { x, y: baseY });
+    });
+
+    // Hang remedial chains below their parent (same x, deeper y)
+    let maxDepth = 0;
+    const placeChain = (parentId: string, depth: number) => {
+      const parent = bank.questions.find(q => q.id === parentId);
+      if (!parent?.onIncorrect) return;
+      const childId = parent.onIncorrect;
+      if (!topicQIds.has(childId) || placed.has(childId)) return;
+      placed.add(childId);
+      positions.set(childId, { x: positions.get(parentId)!.x, y: baseY + depth * REM_Y_STEP });
+      if (depth > maxDepth) maxDepth = depth;
+      placeChain(childId, depth + 1);
+    };
+    mainPath.forEach(qId => placeChain(qId, 1));
+
+    // Fallback for any remaining unplaced questions in this topic
+    topicQs.filter(q => !placed.has(q.id)).forEach((q, i) => {
+      positions.set(q.id, { x: LEFT + i * MAIN_X_STEP, y: baseY + (maxDepth + 1) * REM_Y_STEP });
+    });
+
+    baseY += (maxDepth + 1) * REM_Y_STEP + TOPIC_GAP;
   });
 
-  dagre.layout(g);
-
-  const layouted = questionNodes.map((n) => {
-    const { x, y } = g.node(n.id);
-    return { ...n, position: { x: x - NODE_W / 2, y: y - NODE_H / 2 } };
-  });
-
-  // Reposition topic labels: place each above the topmost node of its topic
-  const topByTopic = new Map<string, { x: number; y: number }>();
-  layouted.forEach((n) => {
+  // ── find leftmost-topmost position per topic for label placement ───────────
+  const topLeftByTopic = new Map<string, { x: number; y: number }>();
+  nodes.filter(n => n.type === "adminQuestion").forEach(n => {
     const topicId = (n.data?.topic as Topic | undefined)?.id;
     if (!topicId) return;
-    const cur = topByTopic.get(topicId);
-    if (!cur || n.position.y < cur.y || (n.position.y === cur.y && n.position.x < cur.x)) {
-      topByTopic.set(topicId, n.position);
+    const pos = positions.get(n.id);
+    if (!pos) return;
+    const cur = topLeftByTopic.get(topicId);
+    if (!cur || pos.y < cur.y || (pos.y === cur.y && pos.x < cur.x))
+      topLeftByTopic.set(topicId, pos);
+  });
+
+  return nodes.map(n => {
+    if (n.type === "adminQuestion") {
+      const pos = positions.get(n.id);
+      return pos ? { ...n, position: pos } : n;
     }
+    if (n.type === "topicLabel") {
+      const topicId = n.id.replace(/^topic-/, "");
+      const pos = topLeftByTopic.get(topicId);
+      return pos ? { ...n, position: { x: pos.x - 30, y: pos.y - 60 } } : n;
+    }
+    return n;
   });
-
-  const reposLabels = topicLabelNodes.map((n) => {
-    // node id is `topic-{topicId}`, topicId itself may contain "topic-"
-    const topicId = n.id.replace(/^topic-/, "");
-    const pos = topByTopic.get(topicId);
-    return pos
-      ? { ...n, position: { x: pos.x - 30, y: pos.y - 60 } }
-      : n;
-  });
-
-  return [...layouted, ...reposLabels];
 }
 
 // ─── Inner editor (has access to ReactFlow context via ReactFlowProvider) ────
@@ -328,10 +390,10 @@ function MindMapEditorInner({
   };
 
   const handleAutoLayout = useCallback(() => {
-    setNodes((prev) => computeAutoLayout(prev, edges));
+    setNodes((prev) => computeZLayout(prev, bank));
     setHasUnsaved(true);
     setLayoutPending(true);
-  }, [edges, setNodes]);
+  }, [bank, setNodes]);
 
   const handleNodeDoubleClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
