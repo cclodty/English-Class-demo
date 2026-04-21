@@ -3,9 +3,12 @@ import { ReactFlow,
   Background,
   Controls,
   MiniMap,
+  Panel,
+  ReactFlowProvider,
   addEdge,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   type Node,
   type Edge,
   type Connection,
@@ -14,6 +17,7 @@ import { ReactFlow,
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import dagre from "@dagrejs/dagre";
 import type { Question, QuestionBank, Topic } from "../../types";
 import Button from "../shared/Button";
 
@@ -33,7 +37,6 @@ function AdminQuestionNode({ data, selected }: NodeProps) {
         selected ? "border-indigo-500 shadow-md shadow-indigo-100" : "border-gray-200"
       }`}
     >
-      {/* Topic colour bar */}
       <div
         className="h-1.5 rounded-t-xl"
         style={{ backgroundColor: topic?.color ?? "#94a3b8" }}
@@ -59,7 +62,6 @@ function AdminQuestionNode({ data, selected }: NodeProps) {
           {data.label as string}
         </p>
       </div>
-      {/* Handles */}
       <Handle
         type="target"
         position={Position.Top}
@@ -103,12 +105,14 @@ const nodeTypes = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+const NODE_W = 210;
+const NODE_H = 90;
+
 function bankToFlow(bank: QuestionBank): { nodes: Node[]; edges: Edge[] } {
   const topicsMap = new Map(bank.topics.map((t) => [t.id, t]));
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // Topic label nodes
   const topicFirstQuestion = new Map<string, Question>();
   bank.questions.forEach((q) => {
     if (!topicFirstQuestion.has(q.topicId)) topicFirstQuestion.set(q.topicId, q);
@@ -127,7 +131,6 @@ function bankToFlow(bank: QuestionBank): { nodes: Node[]; edges: Edge[] } {
     }
   });
 
-  // Question nodes
   bank.questions.forEach((q) => {
     const topic = topicsMap.get(q.topicId);
     nodes.push({
@@ -177,7 +180,6 @@ function applyFlowToBank(
   nodes: Node[],
   edges: Edge[]
 ): QuestionBank {
-  // Build connection map from edges
   const correctMap = new Map<string, string>();
   const incorrectMap = new Map<string, string>();
   edges.forEach((e) => {
@@ -186,7 +188,6 @@ function applyFlowToBank(
     else if (e.sourceHandle === "incorrect") incorrectMap.set(e.source, e.target);
   });
 
-  // Build position map
   const posMap = new Map(nodes.map((n) => [n.id, n.position]));
 
   const questions = bank.questions.map((q) => ({
@@ -199,7 +200,56 @@ function applyFlowToBank(
   return { ...bank, questions };
 }
 
-// ─── Main Editor Component ───────────────────────────────────────────────────
+/** Run dagre layout on question nodes, then reposition topic labels above their group. */
+function computeAutoLayout(nodes: Node[], edges: Edge[]): Node[] {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: "TB", nodesep: 80, ranksep: 100, marginx: 60, marginy: 60 });
+
+  const questionNodes = nodes.filter((n) => n.type === "adminQuestion");
+  const topicLabelNodes = nodes.filter((n) => n.type !== "adminQuestion");
+
+  questionNodes.forEach((n) => g.setNode(n.id, { width: NODE_W, height: NODE_H }));
+
+  // Only add edges between nodes that exist in the graph
+  const nodeIds = new Set(questionNodes.map((n) => n.id));
+  edges.forEach((e) => {
+    if (nodeIds.has(e.source) && nodeIds.has(e.target)) {
+      g.setEdge(e.source, e.target);
+    }
+  });
+
+  dagre.layout(g);
+
+  const layouted = questionNodes.map((n) => {
+    const { x, y } = g.node(n.id);
+    return { ...n, position: { x: x - NODE_W / 2, y: y - NODE_H / 2 } };
+  });
+
+  // Reposition topic labels: place each above the topmost node of its topic
+  const topByTopic = new Map<string, { x: number; y: number }>();
+  layouted.forEach((n) => {
+    const topicId = (n.data?.topic as Topic | undefined)?.id;
+    if (!topicId) return;
+    const cur = topByTopic.get(topicId);
+    if (!cur || n.position.y < cur.y || (n.position.y === cur.y && n.position.x < cur.x)) {
+      topByTopic.set(topicId, n.position);
+    }
+  });
+
+  const reposLabels = topicLabelNodes.map((n) => {
+    // node id is `topic-{topicId}`, topicId itself may contain "topic-"
+    const topicId = n.id.replace(/^topic-/, "");
+    const pos = topByTopic.get(topicId);
+    return pos
+      ? { ...n, position: { x: pos.x - 30, y: pos.y - 60 } }
+      : n;
+  });
+
+  return [...layouted, ...reposLabels];
+}
+
+// ─── Inner editor (has access to ReactFlow context via ReactFlowProvider) ────
 
 interface Props {
   bank: QuestionBank;
@@ -210,7 +260,7 @@ interface Props {
   onAddQuestion: () => void;
 }
 
-export default function MindMapEditor({
+function MindMapEditorInner({
   bank,
   onSave,
   onEditQuestion,
@@ -223,15 +273,27 @@ export default function MindMapEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; questionId: string } | null>(null);
   const [hasUnsaved, setHasUnsaved] = useState(false);
+  const [layoutPending, setLayoutPending] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { fitView } = useReactFlow();
 
-  // Sync when bank changes externally
+  // Sync when bank changes externally (e.g. after import)
   useEffect(() => {
     const { nodes: n, edges: e } = bankToFlow(bank);
     setNodes(n);
     setEdges(e);
     setHasUnsaved(false);
   }, [bank, setNodes, setEdges]);
+
+  // Run fitView after auto-layout settles
+  useEffect(() => {
+    if (!layoutPending) return;
+    const id = setTimeout(() => {
+      fitView({ padding: 0.12, duration: 500 });
+      setLayoutPending(false);
+    }, 60);
+    return () => clearTimeout(id);
+  }, [layoutPending, fitView]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -265,6 +327,12 @@ export default function MindMapEditor({
     setHasUnsaved(false);
   };
 
+  const handleAutoLayout = useCallback(() => {
+    setNodes((prev) => computeAutoLayout(prev, edges));
+    setHasUnsaved(true);
+    setLayoutPending(true);
+  }, [edges, setNodes]);
+
   const handleNodeDoubleClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       if (node.type === "topicLabel") return;
@@ -292,41 +360,6 @@ export default function MindMapEditor({
 
   return (
     <div ref={containerRef} className="relative w-full h-full" onClick={closeMenu}>
-      {/* Toolbar */}
-      <div className="absolute top-3 left-3 z-10 flex gap-2 flex-wrap">
-        <Button size="sm" onClick={onAddQuestion}>
-          + Add Question
-        </Button>
-        <Button
-          size="sm"
-          variant={hasUnsaved ? "primary" : "secondary"}
-          onClick={handleSave}
-        >
-          {hasUnsaved ? "💾 Save Changes" : "Saved ✓"}
-        </Button>
-      </div>
-
-      {/* Legend */}
-      <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200 px-3 py-2 text-xs space-y-1 shadow-sm">
-        <div className="font-semibold text-gray-600 mb-1">Edge types</div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-0.5 bg-emerald-500" />
-          <span className="text-gray-600">Correct answer</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-0.5 bg-rose-500 border-dashed border-b border-rose-500" style={{ backgroundImage: "repeating-linear-gradient(90deg,#f43f5e 0,#f43f5e 4px,transparent 4px,transparent 7px)", height: 2 }} />
-          <span className="text-gray-600">Wrong answer</span>
-        </div>
-        <div className="flex items-center gap-2 mt-1 pt-1 border-t border-gray-100">
-          <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-gray-500">Drag from green handle = correct path</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-rose-500" />
-          <span className="text-gray-500">Drag from red handle = wrong path</span>
-        </div>
-      </div>
-
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -354,6 +387,53 @@ export default function MindMapEditor({
           }}
           position="bottom-right"
         />
+
+        {/* Toolbar panel — rendered inside ReactFlow so useReactFlow works */}
+        <Panel position="top-left">
+          <div className="flex gap-2 flex-wrap">
+            <Button size="sm" onClick={onAddQuestion}>
+              + Add Question
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleAutoLayout}
+              title="Automatically re-arrange all nodes to avoid overlaps"
+            >
+              ⬡ Auto Layout
+            </Button>
+            <Button
+              size="sm"
+              variant={hasUnsaved ? "primary" : "secondary"}
+              onClick={handleSave}
+            >
+              {hasUnsaved ? "💾 Save Changes" : "Saved ✓"}
+            </Button>
+          </div>
+        </Panel>
+
+        {/* Legend */}
+        <Panel position="top-right">
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200 px-3 py-2 text-xs space-y-1 shadow-sm">
+            <div className="font-semibold text-gray-600 mb-1">Edge types</div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-0.5 bg-emerald-500" />
+              <span className="text-gray-600">Correct answer</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-0.5" style={{ backgroundImage: "repeating-linear-gradient(90deg,#f43f5e 0,#f43f5e 4px,transparent 4px,transparent 7px)", height: 2 }} />
+              <span className="text-gray-600">Wrong answer</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1 pt-1 border-t border-gray-100">
+              <div className="w-3 h-3 rounded-full bg-emerald-500" />
+              <span className="text-gray-500">Drag from green = correct path</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-rose-500" />
+              <span className="text-gray-500">Drag from red = wrong path</span>
+            </div>
+          </div>
+        </Panel>
       </ReactFlow>
 
       {/* Context menu */}
@@ -399,5 +479,15 @@ export default function MindMapEditor({
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Public export: wraps inner component with ReactFlowProvider ─────────────
+
+export default function MindMapEditor(props: Props) {
+  return (
+    <ReactFlowProvider>
+      <MindMapEditorInner {...props} />
+    </ReactFlowProvider>
   );
 }
