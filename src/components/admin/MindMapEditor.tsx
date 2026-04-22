@@ -209,12 +209,27 @@ function applyFlowToBank(
  *   - Topic label nodes sit 60 px above the first node of their row
  */
 function computeZLayout(nodes: Node[], bank: QuestionBank): Node[] {
-  const MAIN_X_STEP = 280; // horizontal gap between main-path nodes
-  const REM_Y_STEP  = 160; // vertical gap per remedial level
-  const TOPIC_GAP   = 100; // extra gap between topic groups
-  const LEFT        = 80;  // left-edge of canvas
+  const STEP_X    = 280; // horizontal gap between nodes in each row
+  const ROW_GAP_Y = 220; // vertical gap between topic rows
+  const LEFT      = 80;  // left-edge of canvas
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  const bonusSet = new Set(bank.bonusIds ?? []);
+
+  // Walk the onIncorrect chain within a topic — this is the horizontal spine
+  // in the new question bank structure (onCorrect exits the topic immediately).
+  function walkSpine(entryId: string, topicQIds: Set<string>): string[] {
+    const path: string[] = [];
+    const seen = new Set<string>();
+    let cur: string | null = topicQIds.has(entryId) ? entryId : null;
+    while (cur && !seen.has(cur)) {
+      seen.add(cur); path.push(cur);
+      const q = bank.questions.find(q => q.id === cur);
+      const next = q?.onIncorrect;
+      cur = (next && topicQIds.has(next)) ? next : null;
+    }
+    return path;
+  }
+
   function getEntry(topicIdx: number, topicQIds: Set<string>): string {
     if (topicIdx === 0) return bank.rootQuestionId;
     return (
@@ -224,68 +239,52 @@ function computeZLayout(nodes: Node[], bank: QuestionBank): Node[] {
     );
   }
 
-  function walkMainPath(entryId: string, topicQIds: Set<string>): string[] {
-    const path: string[] = [];
-    const seen = new Set<string>();
-    let cur: string | null = topicQIds.has(entryId) ? entryId : null;
-    while (cur && !seen.has(cur)) {
-      seen.add(cur); path.push(cur);
-      const q = bank.questions.find(q => q.id === cur);
-      cur = (q?.onCorrect && topicQIds.has(q.onCorrect)) ? q.onCorrect : null;
-    }
-    return path;
-  }
-
-  // ── first pass: find max main-path length for consistent row width ────────
-  let maxMainLen = 1;
+  // ── first pass: find max spine length for consistent row width ────────────
+  let maxSpineLen = 1;
   bank.topics.forEach((topic, idx) => {
-    const qIds = new Set(bank.questions.filter(q => q.topicId === topic.id).map(q => q.id));
-    const len = walkMainPath(getEntry(idx, qIds), qIds).length;
-    if (len > maxMainLen) maxMainLen = len;
+    const qIds = new Set(
+      bank.questions.filter(q => q.topicId === topic.id && !bonusSet.has(q.id)).map(q => q.id)
+    );
+    const len = walkSpine(getEntry(idx, qIds), qIds).length;
+    if (len > maxSpineLen) maxSpineLen = len;
   });
-  const totalW = (maxMainLen - 1) * MAIN_X_STEP;
+  const totalW = (maxSpineLen - 1) * STEP_X;
 
   // ── second pass: assign positions ─────────────────────────────────────────
   const positions = new Map<string, { x: number; y: number }>();
   let baseY = 0;
 
   bank.topics.forEach((topic, topicIdx) => {
-    const isLTR  = topicIdx % 2 === 0;
-    const topicQs  = bank.questions.filter(q => q.topicId === topic.id);
+    const isLTR = topicIdx % 2 === 0;
+    const topicQs  = bank.questions.filter(q => q.topicId === topic.id && !bonusSet.has(q.id));
     const topicQIds = new Set(topicQs.map(q => q.id));
 
-    const mainPath = walkMainPath(getEntry(topicIdx, topicQIds), topicQIds);
-    const placed   = new Set(mainPath);
+    const spine  = walkSpine(getEntry(topicIdx, topicQIds), topicQIds);
+    const placed = new Set(spine);
 
-    // Place main-path nodes on the horizontal spine
-    mainPath.forEach((qId, i) => {
-      const x = isLTR ? LEFT + i * MAIN_X_STEP : LEFT + totalW - i * MAIN_X_STEP;
+    spine.forEach((qId, i) => {
+      const x = isLTR ? LEFT + i * STEP_X : LEFT + totalW - i * STEP_X;
       positions.set(qId, { x, y: baseY });
     });
 
-    // Hang remedial chains below their parent (same x, deeper y)
-    let maxDepth = 0;
-    const placeChain = (parentId: string, depth: number) => {
-      const parent = bank.questions.find(q => q.id === parentId);
-      if (!parent?.onIncorrect) return;
-      const childId = parent.onIncorrect;
-      if (!topicQIds.has(childId) || placed.has(childId)) return;
-      placed.add(childId);
-      positions.set(childId, { x: positions.get(parentId)!.x, y: baseY + depth * REM_Y_STEP });
-      if (depth > maxDepth) maxDepth = depth;
-      placeChain(childId, depth + 1);
-    };
-    mainPath.forEach(qId => placeChain(qId, 1));
-
-    // Fallback for any remaining unplaced questions in this topic
+    // Fallback: any topic question not reached by the spine
     topicQs.filter(q => !placed.has(q.id)).forEach((q, i) => {
-      positions.set(q.id, { x: LEFT + i * MAIN_X_STEP, y: baseY + (maxDepth + 1) * REM_Y_STEP });
+      positions.set(q.id, { x: LEFT + i * STEP_X, y: baseY + 120 });
     });
 
-    baseY += (maxDepth + 1) * REM_Y_STEP + TOPIC_GAP;
+    baseY += ROW_GAP_Y;
   });
 
-  // ── find leftmost-topmost position per topic for label placement ───────────
+  // ── bonus questions: extra row below all topics ────────────────────────────
+  const bonusQs = (bank.bonusIds ?? [])
+    .map(id => bank.questions.find(q => q.id === id))
+    .filter(Boolean) as typeof bank.questions;
+  bonusQs.forEach((q, i) => {
+    positions.set(q.id, { x: LEFT + i * STEP_X, y: baseY });
+  });
+  if (bonusQs.length > 0) baseY += ROW_GAP_Y;
+
+  // ── label placement: leftmost-topmost node per topic ─────────────────────
   const topLeftByTopic = new Map<string, { x: number; y: number }>();
   nodes.filter(n => n.type === "adminQuestion").forEach(n => {
     const topicId = (n.data?.topic as Topic | undefined)?.id;

@@ -2,12 +2,11 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuestions } from "../context/QuestionContext";
 import { useSession } from "../context/SessionContext";
-import LiveMindMap from "../components/student/LiveMindMap";
 import Button from "../components/shared/Button";
 
 export default function ResultsPage() {
   const { bank } = useQuestions();
-  const { answers, visitedPath, reset } = useSession();
+  const { answers, reset } = useSession();
   const navigate = useNavigate();
 
   const mainAnswers = answers.filter((a) => {
@@ -243,29 +242,6 @@ export default function ResultsPage() {
             )}
           </div>
         )}
-
-        {/* Mind map */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-3">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">Your Full Learning Path</h2>
-              <p className="text-xs text-gray-400">The path you took through the question tree</p>
-            </div>
-            <div className="flex gap-4 text-xs text-gray-500">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /> Correct</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /> Incorrect</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-gray-200 border-2 border-dashed border-gray-300 inline-block" /> Not reached</span>
-            </div>
-          </div>
-          <LiveMindMap
-            questions={bank.questions}
-            topics={bank.topics}
-            answers={answers}
-            currentId={null}
-            visitedPath={visitedPath}
-            height={500}
-          />
-        </div>
 
         {/* Actions */}
         <div className="flex gap-3 justify-center pb-4">

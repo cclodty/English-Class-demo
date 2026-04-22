@@ -5,7 +5,6 @@ import { useSession } from "../context/SessionContext";
 import type { Question } from "../types";
 import QuestionCard from "../components/student/QuestionCard";
 import FeedbackPanel from "../components/student/FeedbackPanel";
-import LiveMindMap from "../components/student/LiveMindMap";
 
 const TIMER_SECONDS = 210; // 3:30
 
@@ -50,7 +49,6 @@ export default function StudentPage() {
 
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean } | null>(null);
-  const [showMap, setShowMap] = useState(false);
   const [confirmAbandon, setConfirmAbandon] = useState(false);
 
   // Countdown timer
@@ -209,12 +207,6 @@ export default function StudentPage() {
             <span className="font-medium">{answered}</span>
             <span className="text-gray-400 ml-1">answered</span>
           </div>
-          <button
-            onClick={() => setShowMap((v) => !v)}
-            className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg font-medium transition-colors border border-indigo-200"
-          >
-            {showMap ? "Hide Map" : "🗺️ Show Map"}
-          </button>
           {!confirmAbandon ? (
             <button
               onClick={() => setConfirmAbandon(true)}
@@ -237,9 +229,9 @@ export default function StudentPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className={`flex gap-6 ${showMap ? "flex-col lg:flex-row" : "justify-center"}`}>
+        <div className="flex justify-center">
           {/* Question panel */}
-          <div className={`space-y-4 ${showMap ? "lg:w-1/2" : "w-full max-w-2xl"}`}>
+          <div className="space-y-4 w-full max-w-2xl">
             {/* Progress dots */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -302,28 +294,6 @@ export default function StudentPage() {
               </div>
             )}
           </div>
-
-          {/* Live mind map */}
-          {showMap && (
-            <div className="lg:w-1/2 space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-sm font-semibold text-gray-700">Your Learning Path</p>
-                <div className="flex gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse inline-block" /> Current</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Correct</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> Wrong</span>
-                </div>
-              </div>
-              <LiveMindMap
-                questions={bank.questions}
-                topics={bank.topics}
-                answers={answers}
-                currentId={showFeedback ? null : currentQuestionId}
-                visitedPath={visitedPath}
-                height={560}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>

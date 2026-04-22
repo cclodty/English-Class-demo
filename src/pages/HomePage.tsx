@@ -111,7 +111,6 @@ export default function HomePage() {
           >
             Start Now →
           </button>
-          <p className="mt-5 text-blue-200 text-sm">50 questions · Adaptive learning · No login required</p>
         </div>
       </header>
 
@@ -135,21 +134,6 @@ export default function HomePage() {
               <p className={`text-xs font-mono font-medium ${c.text}`}>{c.formula}</p>
               <p className="text-gray-700 text-sm italic">"{c.example}"</p>
               <p className="text-gray-500 text-xs">{c.use}</p>
-              {c.entryId ? (
-                <button
-                  onClick={() => navigate("/quiz", { state: { startId: c.entryId } })}
-                  className={`mt-1 self-start text-xs font-semibold text-white ${c.btnBg} px-3.5 py-1.5 rounded-lg transition-colors shadow-sm`}
-                >
-                  Start from here →
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/quiz")}
-                  className={`mt-1 self-start text-xs font-semibold text-white ${c.btnBg} px-3.5 py-1.5 rounded-lg transition-colors shadow-sm`}
-                >
-                  Start from here →
-                </button>
-              )}
             </div>
           ))}
         </div>
