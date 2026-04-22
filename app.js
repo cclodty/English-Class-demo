@@ -44,11 +44,16 @@ const textEl = document.getElementById("question-text");
 const bodyEl = document.getElementById("question-body");
 const feedbackEl = document.getElementById("feedback");
 const submitBtn = document.getElementById("submit-btn");
+const nextBtn = document.getElementById("next-btn");
+const startBtn = document.getElementById("start-btn");
+const homeCard = document.getElementById("home-card");
 const quizCard = document.getElementById("quiz-card");
 const resultCard = document.getElementById("result-card");
 
 let currentQuestion = null;
 let isTransitioning = false;
+let pendingNextId = "";
+let hasSubmittedCurrent = false;
 
 function normalizeText(value) {
   return (value || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -69,6 +74,10 @@ function renderQuestion(qid) {
   visited.add(q.id);
   isTransitioning = false;
   submitBtn.disabled = false;
+  submitBtn.classList.remove("hidden");
+  nextBtn.classList.add("hidden");
+  pendingNextId = "";
+  hasSubmittedCurrent = false;
   progressEl.textContent = `Answered ${answers.length} / Reached ${visited.size} nodes`;
   const progressRatio = Math.min(100, (answers.length / QUESTIONS.length) * 100);
   if (progressFillEl) {
@@ -77,6 +86,7 @@ function renderQuestion(qid) {
   titleEl.textContent = `${TOPICS[q.topicId]?.name ?? q.topicId} · ${q.id}`;
   textEl.textContent = q.text;
   feedbackEl.textContent = "";
+  feedbackEl.className = "feedback";
   bodyEl.innerHTML = "";
 
   if (q.type === "multiple-choice") {
@@ -143,12 +153,16 @@ function maybeFinishQuiz(nextId) {
 }
 
 submitBtn.addEventListener("click", () => {
+  if (hasSubmittedCurrent) {
+    return;
+  }
   const userAnswer = getUserAnswer();
   if (isTransitioning) {
     return;
   }
   if (!userAnswer) {
     feedbackEl.textContent = "Please answer the question before submitting.";
+    feedbackEl.className = "feedback feedback-info";
     return;
   }
   isTransitioning = true;
@@ -169,9 +183,25 @@ submitBtn.addEventListener("click", () => {
   });
 
   feedbackEl.textContent = correct ? `✅ Correct: ${currentQuestion.explanation}` : `❌ Not correct: ${currentQuestion.explanation}`;
+  feedbackEl.className = `feedback ${correct ? "feedback-correct" : "feedback-incorrect"}`;
+  pendingNextId = correct ? currentQuestion.onCorrect : currentQuestion.onIncorrect;
+  hasSubmittedCurrent = true;
+  submitBtn.classList.add("hidden");
+  nextBtn.classList.remove("hidden");
+  isTransitioning = false;
+});
 
-  const nextId = correct ? currentQuestion.onCorrect : currentQuestion.onIncorrect;
-  setTimeout(() => maybeFinishQuiz(nextId), 300);
+nextBtn.addEventListener("click", () => {
+  if (!hasSubmittedCurrent) {
+    return;
+  }
+  maybeFinishQuiz(pendingNextId);
+});
+
+startBtn.addEventListener("click", () => {
+  homeCard.classList.add("hidden");
+  quizCard.classList.remove("hidden");
+  renderQuestion(pickStartQuestionId());
 });
 
 function showResults() {
@@ -180,6 +210,13 @@ function showResults() {
 
   const overall = answers.length ? (answers.filter((a) => a.correct).length / answers.length) * 100 : 0;
   document.getElementById("overall-score").textContent = `Overall Score: ${overall.toFixed(1)}% (${answers.length} questions)`;
+  const insightEl = document.getElementById("insight-summary");
+  insightEl.textContent =
+    overall >= 80
+      ? "Great command of conditional structures. Keep challenging yourself with mixed-context writing."
+      : overall >= 60
+        ? "You understand the core patterns. Focus on tense accuracy and if-clause verb forms."
+        : "Foundation needs reinforcement. Revisit each conditional pattern and practice sentence transformation.";
 
   const topicScoresEl = document.getElementById("topic-scores");
   topicScoresEl.innerHTML = "";
@@ -206,6 +243,24 @@ function showResults() {
     li.textContent = `${m.id}: ${m.text} (Your answer: ${m.userAnswer})`; 
     mistakeList.appendChild(li);
   });
-}
 
-renderQuestion(pickStartQuestionId());
+  const typeBarsEl = document.getElementById("type-bars");
+  typeBarsEl.innerHTML = "";
+  Object.entries(TOPICS).forEach(([topicId, topic]) => {
+    const subset = answers.filter((a) => a.topicId === topicId);
+    if (!subset.length) return;
+    const score = (subset.filter((a) => a.correct).length / subset.length) * 100;
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = `
+      <div class="bar-label">
+        <span>${topic.name}</span>
+        <span>${score.toFixed(0)}%</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${score.toFixed(0)}%; background:${topic.color};"></div>
+      </div>
+    `;
+    typeBarsEl.appendChild(row);
+  });
+}
