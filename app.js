@@ -47,6 +47,7 @@ const submitBtn = document.getElementById("submit-btn");
 const nextBtn = document.getElementById("next-btn");
 const startBtn = document.getElementById("start-btn");
 const homeCard = document.getElementById("home-card");
+const timerEl = document.getElementById("timer");
 const quizCard = document.getElementById("quiz-card");
 const resultCard = document.getElementById("result-card");
 
@@ -54,6 +55,48 @@ let currentQuestion = null;
 let isTransitioning = false;
 let pendingNextId = "";
 let hasSubmittedCurrent = false;
+let timerSeconds = 210;
+let timerInterval = null;
+let timeExpired = false;
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function renderTimer() {
+  if (!timerEl) return;
+  timerEl.textContent = formatTime(timerSeconds);
+  timerEl.classList.toggle("timer-warning", timerSeconds <= 30);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startTimer() {
+  stopTimer();
+  timerSeconds = 210;
+  timeExpired = false;
+  renderTimer();
+  timerInterval = setInterval(() => {
+    timerSeconds -= 1;
+    renderTimer();
+    if (timerSeconds <= 0) {
+      stopTimer();
+      timeExpired = true;
+      maybeFinishQuiz("");
+    }
+  }, 1000);
+}
+
+renderTimer();
 
 function normalizeText(value) {
   return (value || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -136,6 +179,10 @@ function isCorrect(q, userAnswer) {
 }
 
 function maybeFinishQuiz(nextId) {
+  if (timeExpired) {
+    showResults();
+    return;
+  }
   const allBonusDone = [...BONUS_IDS].every((id) => answeredBonus.has(id));
 
   if (nextId && questionMap.has(nextId)) {
@@ -153,6 +200,9 @@ function maybeFinishQuiz(nextId) {
 }
 
 submitBtn.addEventListener("click", () => {
+  if (timeExpired) {
+    return;
+  }
   if (hasSubmittedCurrent) {
     return;
   }
@@ -192,6 +242,9 @@ submitBtn.addEventListener("click", () => {
 });
 
 nextBtn.addEventListener("click", () => {
+  if (timeExpired) {
+    return;
+  }
   if (!hasSubmittedCurrent) {
     return;
   }
@@ -201,10 +254,12 @@ nextBtn.addEventListener("click", () => {
 startBtn.addEventListener("click", () => {
   homeCard.classList.add("hidden");
   quizCard.classList.remove("hidden");
+  startTimer();
   renderQuestion(pickStartQuestionId());
 });
 
 function showResults() {
+  stopTimer();
   quizCard.classList.add("hidden");
   resultCard.classList.remove("hidden");
 
@@ -212,11 +267,13 @@ function showResults() {
   document.getElementById("overall-score").textContent = `Overall Score: ${overall.toFixed(1)}% (${answers.length} questions)`;
   const insightEl = document.getElementById("insight-summary");
   insightEl.textContent =
-    overall >= 80
-      ? "Great command of conditional structures. Keep challenging yourself with mixed-context writing."
-      : overall >= 60
-        ? "You understand the core patterns. Focus on tense accuracy and if-clause verb forms."
-        : "Foundation needs reinforcement. Revisit each conditional pattern and practice sentence transformation.";
+    timeExpired
+      ? "Time is up. Review your weaker areas below and try another attempt with tighter pacing."
+      : overall >= 80
+        ? "Great command of conditional structures. Keep challenging yourself with mixed-context writing."
+        : overall >= 60
+          ? "You understand the core patterns. Focus on tense accuracy and if-clause verb forms."
+          : "Foundation needs reinforcement. Revisit each conditional pattern and practice sentence transformation.";
 
   const topicScoresEl = document.getElementById("topic-scores");
   topicScoresEl.innerHTML = "";
