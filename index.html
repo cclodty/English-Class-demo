@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English If-Conditional Practice</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <p class="eyebrow">Claude-style Learning UI</p>
+        <h1>English If-Conditional Practice</h1>
+        <p class="hero-subtitle">A guided grammar journey with adaptive branching, instant feedback, and clear evaluation.</p>
+      </header>
+
+      <section id="quiz-card" class="card">
+        <div class="card-top">
+          <div id="progress" class="progress"></div>
+          <span class="chip">Adaptive Quiz</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <h2 id="question-title" class="question-title"></h2>
+        <p id="question-text" class="question-text"></p>
+        <div id="question-body" class="question-body"></div>
+        <p id="feedback" class="feedback"></p>
+        <button id="submit-btn" class="primary-btn">Submit Answer</button>
+      </section>
+
+      <section id="result-card" class="card hidden">
+        <h2>Learning Evaluation</h2>
+        <p id="overall-score" class="overall-score"></p>
+        <div id="topic-scores"></div>
+        <h3>Mistake Review</h3>
+        <ul id="mistake-list" class="mistake-list"></ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
