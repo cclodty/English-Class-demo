@@ -38,6 +38,7 @@ const answeredBonus = new Set();
 const answers = [];
 
 const progressEl = document.getElementById("progress");
+const progressFillEl = document.getElementById("progress-fill");
 const titleEl = document.getElementById("question-title");
 const textEl = document.getElementById("question-text");
 const bodyEl = document.getElementById("question-body");
@@ -69,6 +70,10 @@ function renderQuestion(qid) {
   isTransitioning = false;
   submitBtn.disabled = false;
   progressEl.textContent = `Answered ${answers.length} / Reached ${visited.size} nodes`;
+  const progressRatio = Math.min(100, (answers.length / QUESTIONS.length) * 100);
+  if (progressFillEl) {
+    progressFillEl.style.width = `${progressRatio}%`;
+  }
   titleEl.textContent = `${TOPICS[q.topicId]?.name ?? q.topicId} · ${q.id}`;
   textEl.textContent = q.text;
   feedbackEl.textContent = "";
