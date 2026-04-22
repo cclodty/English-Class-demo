@@ -8,26 +8,30 @@
   </head>
   <body>
     <main class="container">
-      <header>
+      <header class="hero">
+        <p class="eyebrow">Grammar Lab</p>
         <h1>English If-Conditional Practice</h1>
-        <p>Finish the quiz to get English learning feedback and topic-by-topic guidance.</p>
+        <p class="hero-subtitle">Finish the quiz to get English learning feedback and topic-by-topic guidance.</p>
       </header>
 
       <section id="quiz-card" class="card">
-        <div id="progress" class="progress"></div>
-        <h2 id="question-title"></h2>
-        <p id="question-text"></p>
+        <div class="card-top">
+          <div id="progress" class="progress"></div>
+          <span class="chip">Interactive</span>
+        </div>
+        <h2 id="question-title" class="question-title"></h2>
+        <p id="question-text" class="question-text"></p>
         <div id="question-body"></div>
         <p id="feedback" class="feedback"></p>
-        <button id="submit-btn">Submit Answer</button>
+        <button id="submit-btn" class="primary-btn">Submit Answer</button>
       </section>
 
       <section id="result-card" class="card hidden">
         <h2>Learning Evaluation</h2>
-        <p id="overall-score"></p>
+        <p id="overall-score" class="overall-score"></p>
         <div id="topic-scores"></div>
         <h3>Mistake Review</h3>
-        <ul id="mistake-list"></ul>
+        <ul id="mistake-list" class="mistake-list"></ul>
       </section>
     </main>
 
