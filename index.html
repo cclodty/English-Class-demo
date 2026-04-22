@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English If-Conditional Practice</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero" id="hero">
+        <p class="eyebrow">Claude-style Learning UI</p>
+        <h1>English If-Conditional Practice</h1>
+        <p class="hero-subtitle">A guided grammar journey with adaptive branching, instant feedback, and clear evaluation.</p>
+      </header>
+
+      <section id="home-card" class="card">
+        <h2>Welcome</h2>
+        <p>
+          This mini course helps you practice Zero, First, Second, and Third Conditionals with adaptive branching questions.
+          You will receive instant explanations and a final learning report.
+        </p>
+        <ul class="home-list">
+          <li>✅ Learn from explanations after each answer</li>
+          <li>✅ Adaptive routes based on your responses</li>
+          <li>✅ Final score + conditional-type performance bars</li>
+        </ul>
+        <button id="start-btn" class="primary-btn">Start Now</button>
+      </section>
+
+      <section id="quiz-card" class="card hidden">
+        <div class="card-top">
+          <div id="progress" class="progress"></div>
+          <div class="top-right">
+            <span class="chip">Adaptive Quiz</span>
+            <span id="timer" class="timer">03:30</span>
+          </div>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <h2 id="question-title" class="question-title"></h2>
+        <p id="bonus-note" class="bonus-note hidden">⭐ Bonus Question: This one gives extra challenge credit.</p>
+        <p id="question-text" class="question-text"></p>
+        <div id="question-body" class="question-body"></div>
+        <p id="feedback" class="feedback"></p>
+        <button id="submit-btn" class="primary-btn">Submit Answer</button>
+        <button id="next-btn" class="secondary-btn hidden">Next Question</button>
+      </section>
+
+      <section id="result-card" class="card hidden">
+        <h2>Learning Evaluation</h2>
+        <p id="overall-score" class="overall-score"></p>
+        <p id="insight-summary" class="insight-summary"></p>
+        <div id="topic-scores"></div>
+        <h3>Performance by Conditional Type</h3>
+        <div id="type-bars"></div>
+        <h3>Mistake Review</h3>
+        <ul id="mistake-list" class="mistake-list"></ul>
+        <button id="review-btn" class="secondary-btn">Review All My Answers</button>
+      </section>
+
+      <section id="review-card" class="card hidden">
+        <h2>Full Answer Review</h2>
+        <p>Use this section to revisit every answered question, your choice, and the explanation.</p>
+        <div id="review-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
