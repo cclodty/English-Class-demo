@@ -40,18 +40,14 @@ export default function StudentPage() {
     [bank.topics]
   );
 
-  const bonusIds: string[] = bank.bonusIds ?? [];
-  const topicEntries: string[] = bank.topicEntries ?? (bank.rootQuestionId ? [bank.rootQuestionId] : []);
+  const bonusIds: string[] = useMemo(() => bank.bonusIds ?? [], [bank.bonusIds]);
   const bonusSet = useMemo(() => new Set(bonusIds), [bonusIds]);
 
-  // Quiz navigation state
   const [phase, setPhase] = useState<Phase>("main");
-  const [topicIdx, setTopicIdx] = useState(0);
-  const [bonusQIdx, setBonusQIdx] = useState(0);
+  const [bonusIdx, setBonusIdx] = useState(0);
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
 
-  // UI state
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean } | null>(null);
   const [showMap, setShowMap] = useState(false);
@@ -61,29 +57,21 @@ export default function StudentPage() {
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Pending next question ID (set during handleSubmit, consumed in handleNext)
+  const pendingNextRef = useRef<string | null | undefined>(undefined);
+
   // Start quiz when bank loads
   useEffect(() => {
-    if (!loading && !started && topicEntries.length > 0) {
-      const firstId = topicEntries[0];
-      if (questionsMap.has(firstId)) {
-        setCurrentQuestionId(firstId);
-        markVisited(firstId);
-        setStarted(true);
-        // Start countdown
-        timerRef.current = setInterval(() => {
-          setTimeLeft((t) => {
-            if (t <= 1) {
-              clearInterval(timerRef.current!);
-              return 0;
-            }
-            return t - 1;
-          });
-        }, 1000);
-      }
+    if (!loading && !started && bank.rootQuestionId && questionsMap.has(bank.rootQuestionId)) {
+      const root = bank.rootQuestionId;
+      setCurrentQuestionId(root);
+      markVisited(root);
+      setStarted(true);
+      timerRef.current = setInterval(() => {
+        setTimeLeft((t) => (t <= 1 ? 0 : t - 1));
+      }, 1000);
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
@@ -96,59 +84,6 @@ export default function StudentPage() {
     }
   }, [timeLeft, started, markComplete, navigate]);
 
-  /** Given a raw nextId from the branching, resolve the actual next question ID.
-   *  Bonus questions are skipped in the main phase by following their onCorrect. */
-  function resolveNext(rawNext: string | null): string | null {
-    if (!rawNext || !questionsMap.has(rawNext)) return null;
-    if (bonusSet.has(rawNext)) {
-      // Skip bonus in main flow; follow its onCorrect to continue
-      const bonusQ = questionsMap.get(rawNext)!;
-      const after = bonusQ.onCorrect;
-      if (!after || !questionsMap.has(after) || bonusSet.has(after)) return null;
-      return after;
-    }
-    return rawNext;
-  }
-
-  function advanceToNextTopic(currentTopicIdx: number) {
-    const nextIdx = currentTopicIdx + 1;
-    if (nextIdx >= topicEntries.length) {
-      // All topics done — enter bonus phase
-      if (bonusIds.length > 0) {
-        setPhase("bonus");
-        setBonusQIdx(0);
-        const firstBonus = bonusIds[0];
-        setCurrentQuestionId(firstBonus);
-        markVisited(firstBonus);
-      } else {
-        markComplete();
-        navigate("/results");
-      }
-    } else {
-      setTopicIdx(nextIdx);
-      const nextEntry = topicEntries[nextIdx];
-      setCurrentQuestionId(nextEntry);
-      markVisited(nextEntry);
-    }
-  }
-
-  function advanceBonusPhase(currentBonusIdx: number) {
-    const nextIdx = currentBonusIdx + 1;
-    if (nextIdx >= bonusIds.length) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      markComplete();
-      navigate("/results");
-    } else {
-      setBonusQIdx(nextIdx);
-      const nextBonus = bonusIds[nextIdx];
-      setCurrentQuestionId(nextBonus);
-      markVisited(nextBonus);
-    }
-  }
-
-  // Stores resolved next question ID so handleNext can navigate after feedback closes
-  const pendingNextRef = useRef<string | null | undefined>(undefined);
-
   const handleSubmit = (response: string) => {
     const question = currentQuestionId ? questionsMap.get(currentQuestionId) : null;
     if (!question) return;
@@ -159,13 +94,13 @@ export default function StudentPage() {
     setShowFeedback(true);
 
     if (phase === "bonus") {
-      pendingNextRef.current = undefined; // handled in advanceBonusPhase
+      pendingNextRef.current = undefined; // handled in handleNext via bonusIdx
       return;
     }
 
-    // Resolve where to go next (don't navigate yet — feedback is showing)
+    // Main phase: resolve next question from branching
     const rawNext = isCorrect ? question.onCorrect : question.onIncorrect;
-    pendingNextRef.current = resolveNext(rawNext); // null = topic ends
+    pendingNextRef.current = (rawNext && questionsMap.has(rawNext)) ? rawNext : null;
   };
 
   const handleNext = () => {
@@ -173,19 +108,40 @@ export default function StudentPage() {
     setLastAnswer(null);
 
     if (phase === "bonus") {
-      advanceBonusPhase(bonusQIdx);
+      const nextIdx = bonusIdx + 1;
+      if (nextIdx >= bonusIds.length) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        markComplete();
+        navigate("/results");
+      } else {
+        setBonusIdx(nextIdx);
+        const nextBonus = bonusIds[nextIdx];
+        setCurrentQuestionId(nextBonus);
+        markVisited(nextBonus);
+      }
       return;
     }
 
     const nextId = pendingNextRef.current;
     pendingNextRef.current = undefined;
 
-    if (nextId) {
+    if (!nextId) {
+      // Shouldn't happen with the new question bank, but handle gracefully
+      markComplete();
+      navigate("/results");
+      return;
+    }
+
+    if (bonusSet.has(nextId)) {
+      // Enter bonus phase
+      const idx = bonusIds.indexOf(nextId);
+      setPhase("bonus");
+      setBonusIdx(idx >= 0 ? idx : 0);
       setCurrentQuestionId(nextId);
       markVisited(nextId);
     } else {
-      // nextId === null: current topic section ended
-      advanceToNextTopic(topicIdx);
+      setCurrentQuestionId(nextId);
+      markVisited(nextId);
     }
   };
 
@@ -206,7 +162,7 @@ export default function StudentPage() {
     );
   }
 
-  if (bank.questions.length === 0) {
+  if (bank.questions.length === 0 || !bank.rootQuestionId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100">
         <div className="bg-white rounded-2xl p-8 shadow-md text-center max-w-sm mx-4">
@@ -228,7 +184,7 @@ export default function StudentPage() {
   const timerColor = timeLeft <= 30 ? "text-red-600" : timeLeft <= 60 ? "text-amber-600" : "text-gray-700";
 
   const isBonusQuestion = phase === "bonus";
-  const bonusProgress = isBonusQuestion ? `${bonusQIdx + 1}/${bonusIds.length}` : null;
+  const bonusProgress = isBonusQuestion ? `${bonusIdx + 1}/${bonusIds.length}` : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50">
@@ -269,16 +225,10 @@ export default function StudentPage() {
           ) : (
             <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
               <span className="text-xs text-red-600 font-medium">Quit?</span>
-              <button
-                onClick={handleAbandon}
-                className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded transition-colors"
-              >
+              <button onClick={handleAbandon} className="text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded transition-colors">
                 Yes
               </button>
-              <button
-                onClick={() => setConfirmAbandon(false)}
-                className="text-xs text-gray-500 hover:text-gray-700 px-1"
-              >
+              <button onClick={() => setConfirmAbandon(false)} className="text-xs text-gray-500 hover:text-gray-700 px-1">
                 No
               </button>
             </div>
@@ -290,7 +240,7 @@ export default function StudentPage() {
         <div className={`flex gap-6 ${showMap ? "flex-col lg:flex-row" : "justify-center"}`}>
           {/* Question panel */}
           <div className={`space-y-4 ${showMap ? "lg:w-1/2" : "w-full max-w-2xl"}`}>
-            {/* Progress indicator */}
+            {/* Progress dots */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1 flex-wrap">
@@ -303,16 +253,8 @@ export default function StudentPage() {
                         title={id}
                         className={`w-2.5 h-2.5 rounded-full ${
                           isBonus
-                            ? a?.isCorrect
-                              ? "bg-amber-400"
-                              : a
-                              ? "bg-amber-300"
-                              : "bg-amber-500 animate-pulse"
-                            : a?.isCorrect
-                            ? "bg-green-500"
-                            : a
-                            ? "bg-red-500"
-                            : "bg-indigo-500 animate-pulse"
+                            ? a?.isCorrect ? "bg-amber-400" : a ? "bg-amber-300" : "bg-amber-500 animate-pulse"
+                            : a?.isCorrect ? "bg-green-500" : a ? "bg-red-500" : "bg-indigo-500 animate-pulse"
                         }`}
                       />
                     );
@@ -330,8 +272,8 @@ export default function StudentPage() {
               )}
             </div>
 
-            {/* Bonus transition banner */}
-            {isBonusQuestion && bonusQIdx === 0 && !showFeedback && (
+            {/* Bonus section banner (only on first bonus question) */}
+            {isBonusQuestion && bonusIdx === 0 && !showFeedback && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 text-center">
                 <p className="text-sm font-semibold text-amber-800">
                   ⭐ Main quiz complete! Now answer {bonusIds.length} bonus questions to finish.
@@ -361,7 +303,7 @@ export default function StudentPage() {
             )}
           </div>
 
-          {/* Live mind map panel */}
+          {/* Live mind map */}
           {showMap && (
             <div className="lg:w-1/2 space-y-2">
               <div className="flex items-center justify-between px-1">
