@@ -10,20 +10,48 @@ export default function ResultsPage() {
   const { answers, visitedPath, reset } = useSession();
   const navigate = useNavigate();
 
-  const total = answers.length;
-  const correct = answers.filter((a) => a.isCorrect).length;
+  const mainAnswers = answers.filter((a) => {
+    const q = bank.questions.find((q) => q.id === a.questionId);
+    return q && !q.isBonus;
+  });
+  const bonusAnswers = answers.filter((a) => {
+    const q = bank.questions.find((q) => q.id === a.questionId);
+    return q?.isBonus;
+  });
+
+  const total = mainAnswers.length;
+  const correct = mainAnswers.filter((a) => a.isCorrect).length;
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  const bonusTotal = bonusAnswers.length;
+  const bonusCorrect = bonusAnswers.filter((a) => a.isCorrect).length;
 
   const topicStats = useMemo(() => {
     const stats = new Map<string, { correct: number; total: number; name: string; color: string }>();
     bank.topics.forEach((t) => stats.set(t.id, { correct: 0, total: 0, name: t.name, color: t.color }));
-    answers.forEach((a) => {
+    mainAnswers.forEach((a) => {
       const q = bank.questions.find((q) => q.id === a.questionId);
       if (!q) return;
       const s = stats.get(q.topicId);
       if (s) { s.total += 1; if (a.isCorrect) s.correct += 1; }
     });
     return [...stats.values()].filter((s) => s.total > 0);
+  }, [mainAnswers, bank]);
+
+  // Question type breakdown (all answers including bonus)
+  const typeStats = useMemo(() => {
+    const stats: Record<string, { label: string; correct: number; total: number }> = {
+      "multiple-choice": { label: "Multiple Choice", correct: 0, total: 0 },
+      "true-false": { label: "True / False", correct: 0, total: 0 },
+      "error-correction": { label: "Error Correction", correct: 0, total: 0 },
+    };
+    answers.forEach((a) => {
+      const q = bank.questions.find((q) => q.id === a.questionId);
+      if (!q || !stats[q.type]) return;
+      stats[q.type].total += 1;
+      if (a.isCorrect) stats[q.type].correct += 1;
+    });
+    return Object.values(stats).filter((s) => s.total > 0);
   }, [answers, bank]);
 
   const getMessage = () => {
@@ -34,7 +62,6 @@ export default function ResultsPage() {
   };
   const msg = getMessage();
 
-  // Per-topic feedback helpers
   const getTopicFeedback = (topicPct: number) => {
     if (topicPct >= 90) return { label: "Excellent", labelColor: "bg-green-100 text-green-700", tip: "You have a solid grasp of this topic. Keep it up!" };
     if (topicPct >= 70) return { label: "Good", labelColor: "bg-blue-100 text-blue-700", tip: "Good understanding. A quick revision of the rules will help consolidate your knowledge." };
@@ -42,7 +69,6 @@ export default function ResultsPage() {
     return { label: "Needs Practice", labelColor: "bg-red-100 text-red-700", tip: "This topic needs more attention. Revisit the formula and do extra exercises before moving on." };
   };
 
-  // Overall recommendation
   const weakTopics = topicStats.filter((s) => s.total > 0 && s.correct / s.total < 0.7);
   const strongTopics = topicStats.filter((s) => s.total > 0 && s.correct / s.total >= 0.7);
 
@@ -76,7 +102,7 @@ export default function ResultsPage() {
               <div className="text-3xl mb-1">{msg.emoji}</div>
               <h1 className="text-2xl font-bold text-gray-900 mb-1">Quiz Complete!</h1>
               <p className="text-gray-500 mb-4">{msg.text}</p>
-              <div className="flex gap-5 justify-center sm:justify-start">
+              <div className="flex gap-5 justify-center sm:justify-start flex-wrap">
                 {[
                   { label: "Correct", val: correct, color: "text-green-600" },
                   { label: "Wrong", val: total - correct, color: "text-red-500" },
@@ -92,7 +118,31 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* Topic breakdown with feedback */}
+        {/* Bonus results */}
+        {bonusTotal > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <h2 className="font-semibold text-amber-800 mb-3">⭐ Bonus Questions</h2>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-amber-600">{bonusCorrect}/{bonusTotal}</div>
+                <div className="text-xs text-amber-700 mt-0.5">Correct</div>
+              </div>
+              <div className="flex-1">
+                <div className="h-2.5 bg-amber-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400 rounded-full transition-all duration-700"
+                    style={{ width: `${bonusTotal > 0 ? Math.round((bonusCorrect / bonusTotal) * 100) : 0}%` }}
+                  />
+                </div>
+                <p className="text-xs text-amber-700 mt-1">
+                  {bonusTotal > 0 ? Math.round((bonusCorrect / bonusTotal) * 100) : 0}% on bonus questions
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Topic breakdown */}
         {topicStats.length > 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-800 mb-4">Performance by Topic</h2>
@@ -125,7 +175,32 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {/* Recommendation panel */}
+        {/* Question type breakdown */}
+        {typeStats.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-800 mb-4">Performance by Question Type</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {typeStats.map((s) => {
+                const typePct = Math.round((s.correct / s.total) * 100);
+                return (
+                  <div key={s.label} className="bg-gray-50 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-bold text-indigo-600">{s.correct}/{s.total}</div>
+                    <div className="text-xs font-semibold text-gray-600 mt-0.5">{s.label}</div>
+                    <div className="h-1.5 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full transition-all duration-700"
+                        style={{ width: `${typePct}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">{typePct}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recommendation */}
         {topicStats.length > 0 && (
           <div className={`rounded-2xl border-2 p-5 ${weakTopics.length === 0 ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"}`}>
             <h2 className={`font-semibold mb-2 ${weakTopics.length === 0 ? "text-green-800" : "text-amber-800"}`}>

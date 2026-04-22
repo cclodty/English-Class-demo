@@ -17,13 +17,11 @@ interface BaseQuestion {
   type: QuestionType;
   text: string;
   explanation: string;
-  /** Starting question for the quiz */
   isRoot?: boolean;
-  /** Next question ID when answered correctly (null = end of quiz) */
+  /** Mandatory bonus question shown after the main quiz */
+  isBonus?: boolean;
   onCorrect: string | null;
-  /** Next question ID when answered incorrectly (null = end of quiz) */
   onIncorrect: string | null;
-  /** Position on the mind map canvas */
   position?: { x: number; y: number };
 }
 
@@ -52,8 +50,11 @@ export type Question =
 export interface QuestionBank {
   topics: Topic[];
   questions: Question[];
-  /** ID of the first question to show */
   rootQuestionId: string;
+  /** Entry question ID for each topic section, in order */
+  topicEntries?: string[];
+  /** IDs of bonus questions shown after the main quiz, in order */
+  bonusIds?: string[];
 }
 
 export interface StudentAnswer {

@@ -4,7 +4,7 @@ const QUESTION_BANK_KEY = "questionBank";
 const SCHEMA_VERSION_KEY = "questionBankSchemaVersion";
 // Bump this string whenever the QuestionBank schema has breaking changes.
 // Old stored data will be discarded and fresh data loaded from questions.json.
-const SCHEMA_VERSION = "v3-branching-positions";
+const SCHEMA_VERSION = "v4-new-questions-2026";
 
 export function loadBankFromStorage(): QuestionBank | null {
   try {
