@@ -121,6 +121,16 @@ body {
   color: #cbd5e1;
 }
 
+.bonus-note {
+  margin: 0.45rem 0 0.55rem;
+  background: rgba(250, 204, 21, 0.14);
+  border: 1px solid rgba(250, 204, 21, 0.6);
+  color: #fde68a;
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}
+
 .question-body {
   margin-top: 0.3rem;
 }
@@ -275,6 +285,25 @@ body {
 .bar-fill {
   height: 100%;
   background: linear-gradient(90deg, #22c55e, #38bdf8);
+}
+
+.review-item {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  padding: 0.7rem;
+  margin: 0.65rem 0;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.review-item h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.review-meta {
+  margin: 0.18rem 0;
+  color: #cbd5e1;
+  font-size: 0.9rem;
 }
 
 #answer-input {

@@ -4,6 +4,12 @@ const TOPICS = {
   "topic-second": { name: "Second Conditional", color: "#7C3AED" },
   "topic-third": { name: "Third Conditional", color: "#DC2626" },
 };
+const TOPIC_PATTERNS = [
+  { topicId: "topic-zero", patterns: ["zero conditional"] },
+  { topicId: "topic-first", patterns: ["first conditional"] },
+  { topicId: "topic-second", patterns: ["second conditional"] },
+  { topicId: "topic-third", patterns: ["third conditional"] },
+];
 
 const QUESTIONS = [
   { id: "zr1", type: "true-false", topicId: "topic-zero", text: "The sentence 'If you press the power button, the computer turns on.' is a Zero Conditional.", explanation: "If + present simple (press), present simple (turns on)' — this describes an automatic cause-and-effect fact, which is the Zero Conditional structure.", correctAnswer: "true", onCorrect: "f1", onIncorrect: "zr2" },
@@ -43,13 +49,17 @@ const titleEl = document.getElementById("question-title");
 const textEl = document.getElementById("question-text");
 const bodyEl = document.getElementById("question-body");
 const feedbackEl = document.getElementById("feedback");
+const bonusNoteEl = document.getElementById("bonus-note");
 const submitBtn = document.getElementById("submit-btn");
 const nextBtn = document.getElementById("next-btn");
+const reviewBtn = document.getElementById("review-btn");
 const startBtn = document.getElementById("start-btn");
 const homeCard = document.getElementById("home-card");
 const timerEl = document.getElementById("timer");
 const quizCard = document.getElementById("quiz-card");
 const resultCard = document.getElementById("result-card");
+const reviewCard = document.getElementById("review-card");
+const reviewListEl = document.getElementById("review-list");
 
 let currentQuestion = null;
 let isTransitioning = false;
@@ -102,6 +112,26 @@ function normalizeText(value) {
   return (value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function inferTopicIdFromContent(question) {
+  const haystack = normalizeText(`${question.text || ""} ${question.explanation || ""}`);
+  for (const rule of TOPIC_PATTERNS) {
+    if (rule.patterns.some((p) => haystack.includes(p))) {
+      return rule.topicId;
+    }
+  }
+  return question.topicId;
+}
+
+function formatAnswerForDisplay(question, userAnswer) {
+  if (!userAnswer) return "(no answer)";
+  if (question.type === "multiple-choice") {
+    const key = `option${String(userAnswer).toUpperCase()}`;
+    const optionText = question[key];
+    return optionText ? `${String(userAnswer).toUpperCase()}: ${optionText}` : String(userAnswer).toUpperCase();
+  }
+  return userAnswer;
+}
+
 function pickStartQuestionId() {
   const metaRoot = "z1";
   return questionMap.has(metaRoot) ? metaRoot : "zr1";
@@ -127,6 +157,13 @@ function renderQuestion(qid) {
     progressFillEl.style.width = `${progressRatio}%`;
   }
   titleEl.textContent = `${TOPICS[q.topicId]?.name ?? q.topicId} · ${q.id}`;
+  if (BONUS_IDS.has(q.id)) {
+    const inferredTopicId = inferTopicIdFromContent(q);
+    bonusNoteEl.textContent = `⭐ Bonus Question (${TOPICS[inferredTopicId]?.name ?? "Mixed"}): extra challenge credit.`;
+    bonusNoteEl.classList.remove("hidden");
+  } else {
+    bonusNoteEl.classList.add("hidden");
+  }
   textEl.textContent = q.text;
   feedbackEl.textContent = "";
   feedbackEl.className = "feedback";
@@ -225,9 +262,12 @@ submitBtn.addEventListener("click", () => {
 
   answers.push({
     id: currentQuestion.id,
-    topicId: currentQuestion.topicId,
+    topicId: inferTopicIdFromContent(currentQuestion),
+    originalTopicId: currentQuestion.topicId,
     correct,
     userAnswer,
+    userAnswerText: formatAnswerForDisplay(currentQuestion, userAnswer),
+    questionType: currentQuestion.type,
     explanation: currentQuestion.explanation,
     text: currentQuestion.text,
   });
@@ -292,14 +332,13 @@ function showResults() {
   mistakeList.innerHTML = "";
   if (!mistakes.length) {
     mistakeList.innerHTML = "<li>Excellent work — all answers are correct.</li>";
-    return;
+  } else {
+    mistakes.forEach((m) => {
+      const li = document.createElement("li");
+      li.textContent = `${m.id}: ${m.text} (Your answer: ${m.userAnswer})`; 
+      mistakeList.appendChild(li);
+    });
   }
-
-  mistakes.forEach((m) => {
-    const li = document.createElement("li");
-    li.textContent = `${m.id}: ${m.text} (Your answer: ${m.userAnswer})`; 
-    mistakeList.appendChild(li);
-  });
 
   const typeBarsEl = document.getElementById("type-bars");
   typeBarsEl.innerHTML = "";
@@ -321,3 +360,25 @@ function showResults() {
     typeBarsEl.appendChild(row);
   });
 }
+
+function renderReviewList() {
+  reviewListEl.innerHTML = "";
+  answers.forEach((a, idx) => {
+    const item = document.createElement("div");
+    item.className = "review-item";
+    item.innerHTML = `
+      <h4>${idx + 1}. ${a.id} · ${TOPICS[a.topicId]?.name ?? a.topicId}</h4>
+      <p class="review-meta"><strong>Question:</strong> ${a.text}</p>
+      <p class="review-meta"><strong>Your answer:</strong> ${a.userAnswerText}</p>
+      <p class="review-meta"><strong>Status:</strong> ${a.correct ? "Correct" : "Incorrect"}</p>
+      <p class="review-meta"><strong>Explanation:</strong> ${a.explanation}</p>
+    `;
+    reviewListEl.appendChild(item);
+  });
+}
+
+reviewBtn.addEventListener("click", () => {
+  resultCard.classList.add("hidden");
+  reviewCard.classList.remove("hidden");
+  renderReviewList();
+});
