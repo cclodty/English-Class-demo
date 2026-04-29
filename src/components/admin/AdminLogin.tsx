@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "../shared/Button";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "admin123";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "Englishclass";
 
 async function hashPassword(pw: string): Promise<string> {
   const enc = new TextEncoder().encode(pw);
@@ -70,9 +70,6 @@ export default function AdminLogin({ onSuccess }: Props) {
             {loading ? "Checking…" : "Login"}
           </Button>
         </form>
-        <p className="text-xs text-gray-400 text-center">
-          Default password: <code className="bg-gray-100 px-1 rounded">admin123</code>
-        </p>
       </div>
     </div>
   );
